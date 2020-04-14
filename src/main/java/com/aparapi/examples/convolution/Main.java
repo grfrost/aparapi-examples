@@ -72,7 +72,7 @@ import com.aparapi.opencl.OpenCL.*;
 import java.io.*;
 import java.net.URISyntaxException;
 
-public class ConvolutionOpenCL{
+public class Main{
 
    @Resource("convolution.cl") interface Convolution extends OpenCL<Convolution>{
       Convolution applyConvolution(//
@@ -87,7 +87,7 @@ public class ConvolutionOpenCL{
    public static void main(final String[] _args) {
       final File file;
       try{
-         file = new File(ConvolutionOpenCL.class.getResource("/testcard.jpg").toURI());
+         file = new File(Main.class.getResource("/testcard.jpg").toURI());
       } catch (URISyntaxException e) {
          throw new IllegalStateException("could not get testcard", e);
       }
