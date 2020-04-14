@@ -23,7 +23,7 @@
  * For additional credits (generally to people who reported problems)
  * see CREDITS file.
  */
-package com.aparapi.examples.extension;
+package com.aparapi.examples.mandeldemo;
 
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;

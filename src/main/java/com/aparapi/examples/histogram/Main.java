@@ -23,7 +23,7 @@
  * For additional credits (generally to people who reported problems)
  * see CREDITS file.
  */
-package com.aparapi.examples.extension;
+package com.aparapi.examples.histogram;
 
 import com.aparapi.Kernel;
 import com.aparapi.Range;
@@ -32,9 +32,9 @@ import com.aparapi.device.OpenCLDevice;
 import com.aparapi.opencl.OpenCL;
 import com.aparapi.opencl.OpenCL.Resource;
 
-public class Histogram{
+public class Main{
 
-   @Resource("HistogramKernel.cl") interface HistogramKernel extends OpenCL<HistogramKernel>{
+   @Resource("histogram.cl") interface HistogramKernel extends OpenCL<HistogramKernel>{
 
       public HistogramKernel histogram256(//
             Range _range,//

@@ -23,7 +23,7 @@
  * For additional credits (generally to people who reported problems)
  * see CREDITS file.
  */
-package com.aparapi.examples.extension;
+package com.aparapi.examples.histogram;
 
 import com.aparapi.Range;
 import com.aparapi.device.Device;
@@ -77,8 +77,8 @@ public class HistogramIdeal{
          if (device instanceof OpenCLDevice) {
             final OpenCLDevice openclDevice = (OpenCLDevice) device;
 
-            final HistogramKernel histogram = openclDevice.bind(HistogramKernel.class, Histogram.class.getClassLoader()
-                  .getResourceAsStream("HistogramKernel.cl"));
+            final HistogramKernel histogram = openclDevice.bind(HistogramKernel.class, Main.class.getClassLoader()
+                  .getResourceAsStream("histogram.cl"));
             long start = System.nanoTime();
             histogram.begin()//
                   .put(data)//

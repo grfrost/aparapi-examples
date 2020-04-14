@@ -23,19 +23,12 @@
  * For additional credits (generally to people who reported problems)
  * see CREDITS file.
  */
-package com.aparapi.examples.extension;
+package com.aparapi.examples.mandeldemo;
 
 import com.aparapi.*;
 import com.aparapi.device.*;
 import com.aparapi.internal.kernel.*;
 import com.aparapi.opencl.*;
-import com.aparapi.opencl.OpenCL.*;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.*;
-import java.util.concurrent.*;
 import com.aparapi.opencl.OpenCL.Resource;
 
 /**
@@ -49,12 +42,12 @@ import com.aparapi.opencl.OpenCL.Resource;
  *
  */
 
-@Resource("mandel2.cl")
-public interface Mandel extends OpenCL<Mandel>{
-   Mandel createMandleBrot(//
-                           Range range,//
-                           @Arg("scale") float scale, //
-                           @Arg("offsetx") float offsetx, //
-                           @Arg("offsety") float offsety, //
-                           @GlobalWriteOnly("rgb") int[] rgb);
+@Resource("mandeldemo.cl")
+public interface MandelBrot extends OpenCL<MandelBrot>{
+   MandelBrot createMandleBrot(//
+                               Range range,//
+                               @Arg("scale") float scale, //
+                               @Arg("offsetx") float offsetx, //
+                               @Arg("offsety") float offsety, //
+                               @GlobalWriteOnly("rgb") int[] rgb);
 }

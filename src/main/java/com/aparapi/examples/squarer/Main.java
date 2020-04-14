@@ -23,7 +23,7 @@
  * For additional credits (generally to people who reported problems)
  * see CREDITS file.
  */
-package com.aparapi.examples.extension;
+package com.aparapi.examples.squarer;
 
 import com.aparapi.ProfileInfo;
 import com.aparapi.Range;
@@ -35,7 +35,7 @@ import com.aparapi.opencl.OpenCL.Resource;
 import com.aparapi.opencl.OpenCL.Source;
 import java.util.List;
 
-public class SquareExample{
+public class Main{
 
    interface Squarer extends OpenCL<Squarer>{
       @Kernel("{\n"//
@@ -69,6 +69,7 @@ public class SquareExample{
    }
 
    public static void main(String[] args) {
+      System.out.println("Yikes");
       final int size = 32;
       final float[] in = new float[size];
 

@@ -23,7 +23,7 @@
  * For additional credits (generally to people who reported problems)
  * see CREDITS file.
  */
-package com.aparapi.examples.extension;
+package com.aparapi.examples.fft;
 
 import com.aparapi.*;
 import com.aparapi.device.*;
@@ -33,7 +33,7 @@ import com.aparapi.opencl.OpenCL.*;
 
 import java.util.*;
 
-public class FFTExample{
+public class Main{
 
    @Resource("fft.cl")
    interface FFT extends OpenCL<FFT>{

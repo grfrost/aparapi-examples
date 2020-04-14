@@ -61,7 +61,7 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 
 */
 
-package com.aparapi.examples.mandel;
+package com.aparapi.examples.mandel2D;
 
 import com.aparapi.Kernel;
 import com.aparapi.*;
@@ -83,7 +83,7 @@ import java.util.List;
  *
  */
 
-public class Main2D{
+public class Main{
 
    /**
     * An Aparapi Kernel implementation for creating a scaled view of the mandelbrot set.

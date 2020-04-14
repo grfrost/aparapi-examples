@@ -61,27 +61,37 @@ under those regulations, please refer to the U.S. Bureau of Industry and Securit
 
 */
 
-package com.aparapi.examples.extension;
+package com.aparapi.examples.mandeldemo;
 
+import com.aparapi.*;
 import com.aparapi.device.*;
-import com.aparapi.examples.extension.Mandel;
 import com.aparapi.internal.kernel.*;
 import com.aparapi.opencl.*;
 import com.aparapi.opencl.OpenCL.*;
-import com.aparapi.Range;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
+import java.util.concurrent.*;
 
-public class MandelSimple{
+public class Main{
 
    /** User selected zoom-in point on the Mandelbrot view. */
    public static volatile Point to = null;
 
-   public static Mandel mandelBrot = null;
+   public static MandelBrot mandelBrot = null;
 
+   public static MandelBrot gpuMandelBrot = null;
+
+   public static MandelBrot cpuMandelBrot = null;
+
+   public static MandelBrot javaMandelBrot = null;
+
+   public static MandelBrot javaMandelBrotMultiThread = null;
+
+   // new JavaMandelBrot();
+   //new JavaMandelBrotMultiThread();
    @SuppressWarnings("serial") public static void main(String[] _args) {
 
       final JFrame frame = new JFrame("MandelBrot");
@@ -125,6 +135,33 @@ public class MandelSimple{
 
       final JPanel controlPanel = new JPanel(new FlowLayout());
 
+      final String[] choices = new String[] {
+            "Java Sequential",
+            "Java Threads",
+            "GPU OpenCL",
+              "CPU OpenCL"
+      };
+
+      final JComboBox startButton = new JComboBox(choices);
+
+      startButton.addItemListener(new ItemListener(){
+         @Override public void itemStateChanged(ItemEvent e) {
+            final String item = (String) startButton.getSelectedItem();
+
+            if (item.equals(choices[2])) {
+               mandelBrot = gpuMandelBrot;
+            }else if (item.equals(choices[3])) {
+                  mandelBrot = cpuMandelBrot;
+            } else if (item.equals(choices[0])) {
+               mandelBrot = javaMandelBrot;
+            } else if (item.equals(choices[1])) {
+               mandelBrot = javaMandelBrotMultiThread;
+            }
+         }
+
+      });
+      controlPanel.add(startButton);
+
       controlPanel.add(new JLabel("FPS"));
       final JTextField framesPerSecondTextField = new JTextField("0", 5);
 
@@ -148,82 +185,84 @@ public class MandelSimple{
       float offsetx = .0f;
 
       float offsety = .0f;
-      final Device device = KernelManager.instance().bestDevice();
+      Device device = KernelManager.instance().bestDevice();
       if (device instanceof OpenCLDevice) {
          final OpenCLDevice openclDevice = (OpenCLDevice) device;
-
          System.out.println("max memory = " + openclDevice.getGlobalMemSize());
          System.out.println("max mem alloc size = " + openclDevice.getMaxMemAllocSize());
-         mandelBrot = openclDevice.bind(Mandel.class);
+         gpuMandelBrot = openclDevice.bind(MandelBrot.class);
+      }
 
-         final float defaultScale = 3f;
-         scale = defaultScale;
-         offsetx = -1f;
-         offsety = 0f;
-         final Range range = device.createRange2D(width, height);
-         mandelBrot.createMandleBrot(range, scale, offsetx, offsety, imageRgb);
-         viewer.repaint();
+      javaMandelBrot = new JavaMandelBrot();
+      javaMandelBrotMultiThread = new JavaMandelBrotMultiThread();
+      mandelBrot = javaMandelBrot;
+      final float defaultScale = 3f;
+      scale = defaultScale;
+      offsetx = -1f;
+      offsety = 0f;
+      final Range range = device.createRange2D(width, height);
+      mandelBrot.createMandleBrot(range, scale, offsetx, offsety, imageRgb);
+      viewer.repaint();
 
-         // Window listener to dispose Kernel resources on user exit.
-         frame.addWindowListener(new WindowAdapter(){
-            @Override public void windowClosing(WindowEvent _windowEvent) {
-               // mandelBrot.dispose();
-               System.exit(0);
+      // Window listener to dispose Kernel resources on user exit.
+      frame.addWindowListener(new WindowAdapter(){
+         @Override public void windowClosing(WindowEvent _windowEvent) {
+            // mandelBrot.dispose();
+            System.exit(0);
+         }
+      });
+
+      while (true) {
+         // Wait for the user to click somewhere
+         while (to == null) {
+            synchronized (userClickDoorBell) {
+               try {
+                  userClickDoorBell.wait();
+               } catch (final InterruptedException ie) {
+                  ie.getStackTrace();
+               }
             }
-         });
+         }
 
-         while (true) {
-            // Wait for the user to click somewhere
-            while (to == null) {
-               synchronized (userClickDoorBell) {
+         float x = -1f;
+         float y = 0f;
+         final float tox = ((float) (to.x - (width / 2)) / width) * scale;
+         final float toy = ((float) (to.y - (height / 2)) / height) * scale;
+
+         // This is how many frames we will display as we zoom in and out.
+         final int frames = 128;
+         long startMillis = System.currentTimeMillis();
+         int frameCount = 0;
+         for (int sign = -1; sign < 2; sign += 2) {
+            for (int i = 0; i < (frames - 4); i++) {
+               scale = scale + ((sign * defaultScale) / frames);
+               x = x - (sign * (tox / frames));
+               y = y - (sign * (toy / frames));
+               offsetx = x;
+               offsety = y;
+               mandelBrot.createMandleBrot(range, scale, offsetx, offsety, imageRgb);
+               viewer.repaint();
+               synchronized (framePaintedDoorBell) {
                   try {
-                     userClickDoorBell.wait();
+                     framePaintedDoorBell.wait();
                   } catch (final InterruptedException ie) {
                      ie.getStackTrace();
                   }
                }
-            }
-
-            float x = -1f;
-            float y = 0f;
-            final float tox = ((float) (to.x - (width / 2)) / width) * scale;
-            final float toy = ((float) (to.y - (height / 2)) / height) * scale;
-
-            // This is how many frames we will display as we zoom in and out.
-            final int frames = 128;
-            long startMillis = System.currentTimeMillis();
-            int frameCount = 0;
-            for (int sign = -1; sign < 2; sign += 2) {
-               for (int i = 0; i < (frames - 4); i++) {
-                  scale = scale + ((sign * defaultScale) / frames);
-                  x = x - (sign * (tox / frames));
-                  y = y - (sign * (toy / frames));
-                  offsetx = x;
-                  offsety = y;
-                  mandelBrot.createMandleBrot(range, scale, offsetx, offsety, imageRgb);
-                  viewer.repaint();
-                  synchronized (framePaintedDoorBell) {
-                     try {
-                        framePaintedDoorBell.wait();
-                     } catch (final InterruptedException ie) {
-                        ie.getStackTrace();
-                     }
-                  }
-                  frameCount++;
-                  final long endMillis = System.currentTimeMillis();
-                  final long elapsedMillis = endMillis - startMillis;
-                  if (elapsedMillis > 1000) {
-                     framesPerSecondTextField.setText("" + ((frameCount * 1000) / elapsedMillis));
-                     frameCount = 0;
-                     startMillis = endMillis;
-                  }
+               frameCount++;
+               final long endMillis = System.currentTimeMillis();
+               final long elapsedMillis = endMillis - startMillis;
+               if (elapsedMillis > 1000) {
+                  framesPerSecondTextField.setText("" + ((frameCount * 1000) / elapsedMillis));
+                  frameCount = 0;
+                  startMillis = endMillis;
                }
             }
-
-            // Reset zoom-in point.
-            to = null;
-
          }
+
+         // Reset zoom-in point.
+         to = null;
+
       }
 
    }
