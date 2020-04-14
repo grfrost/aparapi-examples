@@ -84,6 +84,8 @@ public class MandelExample{
 
    public static MandelBrot gpuMandelBrot = null;
 
+   public static MandelBrot cpuMandelBrot = null;
+
    public static MandelBrot javaMandelBrot = null;
 
    public static MandelBrot javaMandelBrotMultiThread = null;
@@ -136,7 +138,8 @@ public class MandelExample{
       final String[] choices = new String[] {
             "Java Sequential",
             "Java Threads",
-            "GPU OpenCL"
+            "GPU OpenCL",
+              "CPU OpenCL"
       };
 
       final JComboBox startButton = new JComboBox(choices);
@@ -147,6 +150,8 @@ public class MandelExample{
 
             if (item.equals(choices[2])) {
                mandelBrot = gpuMandelBrot;
+            }else if (item.equals(choices[3])) {
+                  mandelBrot = cpuMandelBrot;
             } else if (item.equals(choices[0])) {
                mandelBrot = javaMandelBrot;
             } else if (item.equals(choices[1])) {
@@ -183,7 +188,6 @@ public class MandelExample{
       Device device = KernelManager.instance().bestDevice();
       if (device instanceof OpenCLDevice) {
          final OpenCLDevice openclDevice = (OpenCLDevice) device;
-
          System.out.println("max memory = " + openclDevice.getGlobalMemSize());
          System.out.println("max mem alloc size = " + openclDevice.getMaxMemAllocSize());
          gpuMandelBrot = openclDevice.bind(MandelBrot.class);
