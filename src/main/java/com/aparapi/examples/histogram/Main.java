@@ -29,6 +29,7 @@ import com.aparapi.Kernel;
 import com.aparapi.Range;
 import com.aparapi.device.Device;
 import com.aparapi.device.OpenCLDevice;
+import com.aparapi.examples.common.StopWatch;
 import com.aparapi.opencl.OpenCL;
 import com.aparapi.opencl.OpenCL.Resource;
 

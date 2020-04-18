@@ -15,6 +15,7 @@ Many thanks to Simon for his excellent project and for permission to use it
 as the basis of an Aparapi example.
 **/
 
+import com.aparapi.examples.common.StopWatch;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -37,7 +38,7 @@ public class Main extends JFrame{
    public Main() {
       BufferedImage image = null;
       try {
-         InputStream isr = Main.class.getResourceAsStream("ballroom-shining.jpg");
+         InputStream isr = Main.class.getResourceAsStream("/ballroom-shining.jpg");
          image = ImageIO.read(isr);
       } catch (IOException e) {
          // TODO Auto-generated catch block
@@ -45,7 +46,7 @@ public class Main extends JFrame{
       }
       Dessin d = new Dessin(image);
 
-      InputStream hcis = Main.class.getResourceAsStream("haarcascade_frontalface_alt2.xml");
+      InputStream hcis = Main.class.getResourceAsStream("/haarcascade_frontalface_alt2.xml");
       HaarCascade haarCascade = HaarCascade.create(hcis);
 
       Detector detector = new AparapiDetector2(haarCascade, 1f, 2f, 0.1f, false);

@@ -27,6 +27,7 @@ package com.aparapi.examples.fft;
 
 import com.aparapi.*;
 import com.aparapi.device.*;
+import com.aparapi.examples.common.StopWatch;
 import com.aparapi.internal.kernel.*;
 import com.aparapi.opencl.*;
 import com.aparapi.opencl.OpenCL.*;

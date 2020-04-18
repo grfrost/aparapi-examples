@@ -1,6 +1,6 @@
 package com.aparapi.examples.haar;
+import com.aparapi.examples.common.StopWatch;
 import java.awt.image.DataBufferInt;
-import java.util.List;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
