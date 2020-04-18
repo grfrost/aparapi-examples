@@ -24,8 +24,9 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -33,25 +34,26 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class Main extends JFrame{
-
-   public Main(File img, String XMLFile) {
-
-      Image image = null;
+   public Main() {
+      BufferedImage image = null;
       try {
-         image = ImageIO.read(img);
+         InputStream isr = Main.class.getResourceAsStream("ballroom-shining.jpg");
+         image = ImageIO.read(isr);
       } catch (IOException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
       Dessin d = new Dessin(image);
-      HaarCascade haarCascade = HaarCascade.create(XMLFile);
 
-      Detector detector = new AparapiDetector(haarCascade, 1f, 2f, 0.1f, false);
+      InputStream hcis = Main.class.getResourceAsStream("haarcascade_frontalface_alt2.xml");
+      HaarCascade haarCascade = HaarCascade.create(hcis);
+
+      Detector detector = new AparapiDetector2(haarCascade, 1f, 2f, 0.1f, false);
       StopWatch sw1 = new StopWatch("first detection");
-      List<Rectangle> res = detector.getFeatures(img.getAbsolutePath());
+      List<Rectangle> res = detector.getFeatures(image);
       sw1.stop();
       StopWatch sw2 = new StopWatch("second detection");
-      res = detector.getFeatures(img.getAbsolutePath());
+      res = detector.getFeatures(image);
       sw2.stop();
       res = RectanglePruner.merge(res, 1);
 
@@ -69,9 +71,7 @@ public class Main extends JFrame{
    }
 
    public static void main(String[] args) throws IOException {
-
-    //  new Test(new File(args[0]), args[1]).setVisible(true);
-      new Main(new File("ballroom-shining.jpg"), "haarcascade_frontalface_alt2.xml").setVisible(true);
+      new Main().setVisible(true);
    }
 
 }
@@ -98,7 +98,6 @@ class Dessin extends JPanel{
       if (img == null)
          return;
       Dimension dim = getSize();
-      //System.out.println("v�ridique");
       g1.clearRect(0, 0, dim.width, dim.height);
       double scale_x = dim.width * 1.f / img_width;
       double scale_y = dim.height * 1.f / img_height;

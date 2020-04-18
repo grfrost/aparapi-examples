@@ -17,6 +17,7 @@ as the basis of an Aparapi example.
 
 import java.awt.Rectangle;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -167,6 +168,20 @@ public class HaarCascade{
       SAXBuilder sxb = new SAXBuilder();
       try {
          document = sxb.build(new File(filename));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+
+      return new HaarCascade(document);
+
+   }
+
+   public static HaarCascade create(InputStream is) {
+
+      org.jdom.Document document = null;
+      SAXBuilder sxb = new SAXBuilder();
+      try {
+         document = sxb.build(is);
       } catch (Exception e) {
          e.printStackTrace();
       }

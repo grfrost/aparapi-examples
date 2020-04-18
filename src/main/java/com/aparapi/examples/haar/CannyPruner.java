@@ -1,4 +1,9 @@
 package com.aparapi.examples.haar;
+import java.awt.image.DataBufferInt;
+import java.util.List;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import javax.swing.*;
 
 /**
 This project is based on the open source jviolajones project created by Simon
@@ -71,9 +76,23 @@ public class CannyPruner{
       }
       timer.print("canny convolution 2");
       timer.start();
-      //JFrame f = new JFrame();
-      //f.setContentPane(new DessinChiffre(grad));
-      //f.setVisible(true);
+      boolean show = false;
+      if (show) {
+         JFrame f = new JFrame();
+         final BufferedImage offscreen = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+         int arr[] = ((DataBufferInt) offscreen.getRaster().getDataBuffer()).getData();
+         System.arraycopy(arr, 0, grad, 0, grayImage.length);
+         final JComponent viewer = new JComponent() {
+            @Override
+            public void paintComponent(Graphics g) {
+               g.drawImage(offscreen, 0, 0, width, height, this);
+            }
+         };
+         // Set the size of JComponent which displays Mandelbrot image
+         viewer.setPreferredSize(new Dimension(width, height));
+         f.setContentPane(viewer);
+         f.setVisible(true);
+      }
       for (int i = 0; i < width; i++) {
          int col = 0;
          for (int j = 0; j < height; j++) {
