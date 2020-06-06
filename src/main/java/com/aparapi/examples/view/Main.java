@@ -16,8 +16,6 @@ import javax.swing.*;
 public class Main {
 
     public static class View {
-        private volatile Point point = null;
-        private Object doorBell;
         private int width;
         private int height;
         private BufferedImage image;
@@ -32,22 +30,61 @@ public class Main {
             offscreen = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             offscreenRgb = ((DataBufferInt) offscreen.getRaster().getDataBuffer()).getData();
             imageRgb = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-            doorBell = new Object();
-        }
 
+        }
         void paint(Graphics2D g) {
             g.drawImage(image, 0, 0, width, height, null);
         }
-
         void update() {
             System.arraycopy(offscreenRgb, 0, imageRgb, 0, offscreenRgb.length);
         }
+    }
 
-        Point waitForPoint() {
+    public static class ViewFrame extends JFrame {
+        private volatile Point point = null;
+        private Object doorBell;
+        private View view;
+        private JComponent viewer;
+
+        ViewFrame(String name, View view, Kernel kernel) {
+            super(name);
+            this.doorBell = new Object();
+            this.view = view;
+          //  this.kernel = kernel;
+            this.viewer = new JComponent() {
+                @Override
+                public void paintComponent(Graphics g) {
+                    view.paint((Graphics2D) g);
+                }
+            };
+            viewer.setPreferredSize(new Dimension(view.width, view.height));
+            viewer.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    ringDoorBell(e.getPoint());
+
+                }
+            });
+            getContentPane().add(viewer);
+            pack();
+            setLocationRelativeTo(null);
+            setVisible(true);
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent _windowEvent) {
+                    kernel.dispose();
+                    System.exit(0);
+                }
+            });
+        }
+
+        Point waitForPoint(long timeout) {
             while (point == null) {
                 synchronized (doorBell) {
                     try {
-                        doorBell.wait();
+                        doorBell.wait(timeout);
+                        update();
+                        viewer.repaint();
                     } catch (final InterruptedException ie) {
                         ie.getStackTrace();
                     }
@@ -64,88 +101,21 @@ public class Main {
                 doorBell.notify();
             }
         }
-    }
-
-    public abstract static class ViewFrame extends JFrame {
-        private View view;
-        private JComponent viewer;
-
-        ViewFrame(String name, View view) {
-            super(name);
-            this.view = view;
-            viewer = new JComponent() {
-                @Override
-                public void paintComponent(Graphics g) {
-                    view.paint((Graphics2D) g);
-                }
-            };
-            viewer.setPreferredSize(new Dimension(view.width, view.height));
-            viewer.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    view.ringDoorBell(e.getPoint());
-
-                }
-            });
-            getContentPane().add(viewer);
-            pack();
-            setLocationRelativeTo(null);
-            setVisible(true);
-            addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent _windowEvent) {
-                    shutdown();
-                    System.exit(0);
-                }
-            });
-        }
-
-        public abstract void shutdown();
-
         void update() {
+
             view.update();
             viewer.repaint();
         }
     }
 
 
-    public static class MandelKernel extends Kernel {
-
-        /**
-         * RGB buffer used to store the Mandelbrot image. This buffer holds (width * height) RGB values.
-         */
+    public static class RasterKernel extends Kernel {
         private int[] rgb;
-
-        /**
-         * Mandelbrot image width.
-         */
         private int width;
-
-        /**
-         * Mandelbrot image height.
-         */
         private int height;
-
-        /**
-         * Maximum iterations for Mandelbrot.
-         */
-        final private int maxIterations = 128;
-
-        /**
-         * Palette which maps iteration values to RGB values.
-         */
-        @Constant
-        final private int pallette[] = new int[maxIterations + 1];
-
-        /**
-         * Mutable values of scale, offsetx and offsety so that we can modify the zoom level and position of a view.
-         */
         private float scale = .0f;
-
         private float offsetx = .0f;
-
         private float offsety = .0f;
-
 
         static final int X1 = 0;
         static final int Y1 = 1;
@@ -154,11 +124,10 @@ public class Main {
         static final int X3 = 4;
         static final int Y3 = 5;
 
-        private float triangles[] = new float[]{
-                -.2f, -.2f, -.2f, .2f, .2f, .2f,
-                -1.2f, -1.2f, -1.2f, -1f, -1f, -1f,
-                -2f, -1f, -2f, -.5f, -1.5f, -.5f
-        };
+        public static int MAX_TRIANGLES = 1000;
+        public int triangleCount = 0;
+
+        private float triangles[] = new float[MAX_TRIANGLES * 6];
 
         /**
          * Initialize the Kernel.
@@ -167,18 +136,29 @@ public class Main {
          * @param _height Mandelbrot image height
          * @param _rgb    Mandelbrot image RGB buffer
          */
-        public MandelKernel(int _width, int _height, int[] _rgb) {
-            //Initialize palette values
-            for (int i = 0; i < maxIterations; i++) {
-                final float h = i / (float) maxIterations;
-                final float b = 1.0f - (h * h);
-                pallette[i] = Color.HSBtoRGB(h, 1f, b);
-            }
-
+        public RasterKernel(int _width, int _height, int[] _rgb) {
             width = _width;
             height = _height;
             rgb = _rgb;
 
+        }
+
+        void addTriangle(float x1, float y1, float x2, float y2, float x3, float y3) {
+            triangles[triangleCount * 6 + 0] = x1;
+            triangles[triangleCount * 6 + 1] = y1;
+            // We need the triangle to be clock wound
+            if (side(x1,y1, x2, y2, x3, y3)>0){
+                triangles[triangleCount * 6 + 2] = x2;
+                triangles[triangleCount * 6 + 3] = y2;
+                triangles[triangleCount * 6 + 4] = x3;
+                triangles[triangleCount * 6 + 5] = y3;
+            }else{
+                triangles[triangleCount * 6 + 2] = x3;
+                triangles[triangleCount * 6 + 3] = y3;
+                triangles[triangleCount * 6 + 4] = x2;
+                triangles[triangleCount * 6 + 5] = y2;
+            }
+            triangleCount++;
         }
 
         public void resetImage(int _width, int _height, int[] _rgb) {
@@ -186,23 +166,6 @@ public class Main {
             height = _height;
             rgb = _rgb;
         }
-
-        public int getCount(float r, float i) {
-            int count = 0;
-            float zr = r;
-            float zi = i;
-            float new_zx = 0f;
-
-            while ((count < maxIterations) && (((zr * zr) + (zi * zi)) < 8)) {
-                new_zx = ((zr * zr) - (zi * zi)) + r;
-                zi = (2 * zr * zi) + i;
-                zr = new_zx;
-                count++;
-            }
-
-            return count;
-        }
-
 
         float side(float x, float y, float x1, float y1, float x2, float y2) {
             return (y2 - y1) * (x - x1) + (-x2 + x1) * (y - y1);
@@ -212,14 +175,11 @@ public class Main {
             return side(x, y, x1, y1, x2, y2) >= 0 && side(x, y, x2, y2, x3, y3) >= 0 && side(x, y, x3, y3, x1, y1) >= 0;
         }
 
-
         boolean online(float x, float y, float x1, float y1, float x2, float y2) {
-            float dxc = x - x1;
-            float dyc = y - y1;
             float dxl = x2 - x1;
             float dyl = y2 - y1;
-            float cross = dxc * dyl - dyc * dxl;
-            if (cross * cross < .000001f) {
+            float cross = (x - x1) * dyl - (y - y1) * dxl;
+            if (cross*cross  < .000001f) {
                 if (dxl * dxl >= dyl * dyl)
                     return dxl > 0 ? x1 <= x && x <= x2 : x2 <= x && x <= x1;
                 else
@@ -231,27 +191,30 @@ public class Main {
 
         @Override
         public void run() {
-
-            /** Determine which RGB value we are going to process (0..RGB.length). */
             final int gid = getGlobalId();
 
             int x = gid % width;
             int y = gid / width;
 
-
             final float r = ((((x) * scale) - ((scale / 2) * width)) / width) + offsetx;
             final float i = ((((y) * scale) - ((scale / 2) * height)) / height) + offsety;
-            rgb[gid] = pallette[getCount(r, i)]&0x1f1f1f;
-            for (int t = 0; t<triangles.length/6; t++) {
-               if (
-                       online(r, i, triangles[X1 + t*6], triangles[Y1 + t*6], triangles[X2 + t*6], triangles[Y2 + t*6]) ||
-                               online(r, i, triangles[X2 + t*6], triangles[Y2 + t*6], triangles[X3 + t*6], triangles[Y3 + t*6]) ||
-                               online(r, i, triangles[X3 + t*6], triangles[Y3 + t*6], triangles[X1 + t*6], triangles[Y1 + t*6])) {
-                  rgb[gid] = 0xffffff;
-               } else if (intriangle(r, i, triangles[X1 + t*6], triangles[Y1 + t*6], triangles[X2 + t*6], triangles[Y2 + t*6], triangles[X3 + t*6], triangles[Y3 + t*6])) {
-                  rgb[gid] = 0x0;
-               }
+
+            int col =  0x00000;
+            for (int t = 0;  t < triangleCount*6; t+=6) {
+                float x1 =  triangles[X1 + t];
+                float y1 =  triangles[Y1 + t];
+                float x2 =  triangles[X2 + t];
+                float y2 =  triangles[Y2 + t];
+                float x3 =  triangles[X3 + t];
+                float y3 =  triangles[Y3 + t];
+                if (intriangle(r, i, x1, y1, x2, y2, x3, y3)) {
+                    col = 0x00001*t;
+                }else   if (online(r, i, x1, y1, x2, y2) || online(r, i, x2, y2, x3, y3) || online(r, i, x3, y3,x1,y1)){
+                    col = 0x010000*t;
+                }
             }
+
+            rgb[gid]=col;
         }
 
         public void setScaleAndOffset(float _scale, float _offsetx, float _offsety) {
@@ -268,41 +231,39 @@ public class Main {
 
     @SuppressWarnings("serial")
     public static void main(String[] _args) {
-        final View view = new View(1024, 1024);
+        final View view = new View(2*1024, 2*1024);
         final Range range = Range.create(view.width * view.height);
+        final RasterKernel kernel = new RasterKernel(view.width, view.height, view.offscreenRgb);
+        //kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.JTP);
+        ViewFrame vf = new ViewFrame("View", view, kernel) ;
 
-        // Create a Kernel passing the size, RGB buffer and the palette.
-        final MandelKernel kernel = new MandelKernel(view.width, view.height, view.offscreenRgb);
-       // kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.GPU);
-        ViewFrame vf = new ViewFrame("View", view) {
-            @Override
-            public void shutdown() {
-                kernel.dispose();
-            }
-        };
+        final float defaultScale = 2f;
 
-        final float defaultScale = 3f;
+        kernel.setScaleAndOffset(defaultScale, -0f, 0f);
 
-        // Set the default scale and offset, execute the kernel and force a repaint of the viewer.
-        kernel.setScaleAndOffset(defaultScale, -1f, 0f);
+        for (int i = 0; i < 200; i++) {
+            float x1 =  (float)(Math.random()  - .5);
+            float y1 =  (float)(Math.random() - .5);
+            float x2 = x1 + (float) (Math.random()-.5);
+            float y2 = y1 + (float) (Math.random()-.5);
+            float x3 = x2 + (float) (Math.random()-.5);
+            float y3 = y2 + (float) (Math.random()-.5);
+            kernel.addTriangle(x1,y1, x2,y2,x3,y3);
+        }
         kernel.execute(range);
-
         vf.update();
 
         System.out.println("device=" + kernel.getTargetDevice());
 
-
-        // Wait until the user selects a zoom-in point on the Mandelbrot view.
-        while (true) {
-            Point point = view.waitForPoint();
-            float x = -1f;
+        for (Point point = vf.waitForPoint(10); point != null; point=vf.waitForPoint(10)){
+            float x = 0f;
             float y = 0f;
             float scale = defaultScale;
             final float tox = ((float) (point.x - (view.width / 2)) / view.width) * scale;
             final float toy = ((float) (point.y - (view.height / 2)) / view.height) * scale;
 
             // This is how many frames we will display as we zoom in and out.
-            final int frames = 200;
+            final int frames = 100;
             final long startMillis = System.currentTimeMillis();
             for (int sign = -1; sign < 2; sign += 2) {
                 for (int i = 0; i < (frames - 4); i++) {
