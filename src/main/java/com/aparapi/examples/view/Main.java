@@ -127,9 +127,9 @@ public class Main {
         static float mat4s[] = new float[MAX_MAT4 * SIZE];
 
         static int createMat4(float x0y0, float x1y0, float x2y0, float x3y0,
-                       float x0y1, float x1y1, float x2y1, float x3y1,
-                       float x0y2, float x1y2, float x2y2, float x3y2,
-                       float x0y3, float x1y3, float x2y3, float x3y3) {
+                              float x0y1, float x1y1, float x2y1, float x3y1,
+                              float x0y2, float x1y2, float x2y2, float x3y2,
+                              float x0y3, float x1y3, float x2y3, float x3y3) {
             mat4s[mat4Count * SIZE + X0Y0] = x0y0;
             mat4s[mat4Count * SIZE + X1Y0] = x1y0;
             mat4s[mat4Count * SIZE + X2Y0] = x2y0;
@@ -186,7 +186,128 @@ public class Main {
                             mat4s[i + X0Y3] + ", " + mat4s[i + X1Y3] + ", " + mat4s[i + X2Y3] + ", " + mat4s[i + X3Y3];
         }
 
+        static int createProjectionMatrix(float width, float height, float near, float far, float fieldOfViewDeg) {
 
+            // Projection Matrix
+
+            float aspectRatio = height / width;
+            float fieldOfViewRadians = (float) (1.0f / Math.tan((fieldOfViewDeg * 0.5f) / 180.0 * Math.PI));
+
+                /*  https://youtu.be/ih20l3pJoeU?t=973
+
+                 --------------------            far
+                  \                /              ^    ^
+                   \              /               |    |   far-near
+                    \            /                |    |
+                     \__________/         near    |    v
+                                           ^      |
+                                           v      v
+                         \^/
+                       [x,y,z]
+
+                */
+
+            return createMat4(
+                    aspectRatio * fieldOfViewRadians, 0f, 0f, 0f,
+                    0f, fieldOfViewRadians, 0f, 0f,
+                    0f, 0f, far / (far - near), (-far * near) / (far - near),
+                    0f, 0f, (-far * near) / (far - near), 0f);
+
+        }
+
+        static int createRotXMat4(float thetaRadians){
+            float sinTheta = (float)Math.sin(thetaRadians);
+            float cosTheta = (float)Math.cos(thetaRadians);
+            return createMat4(
+                    1, 0, 0, 0,
+                    0, cosTheta, sinTheta, 0,
+                    0, -sinTheta, cosTheta, 0,
+                    0, 0, 1, 0
+
+            );
+        }
+
+        static int createRotZMat4(float thetaRadians){
+            float sinTheta = (float)Math.sin(thetaRadians);
+            float cosTheta = (float)Math.cos(thetaRadians);
+            return createMat4(
+                    cosTheta, sinTheta, 0, 0,
+                    -sinTheta, cosTheta, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1
+            );
+        }
+
+        static int createRotYMat4(float thetaRadians){
+            float sinTheta = (float)Math.sin(thetaRadians);
+            float cosTheta = (float)Math.cos(thetaRadians);
+            return createMat4(
+                    cosTheta, 0, sinTheta, 0,
+                    0, 1, 0, 0,
+                    -sinTheta, 0, cosTheta, 0,
+                    0, 0, 0, 1
+            );
+        }
+
+
+
+    }
+
+    public static class Vec2 {
+        static final int SIZE = 3;
+        static final int MAX_VEC2 = 100;
+        static final int X = 0;
+        static final int Y = 1;
+
+        static int vec2Count = 0;
+        static float vec2s[] = new float[MAX_VEC2 * SIZE];
+
+        static int createVec2(float x, float y) {
+            vec2s[vec2Count * SIZE + X] = x;
+            vec2s[vec2Count * SIZE + Y] = y;
+            vec2Count++;
+            return vec2Count;
+        }
+
+
+        static int mulScaler(int i, float s) {
+            i *= SIZE;
+            return createVec2(vec2s[i + X] * s, vec2s[i + Y] * s);
+        }
+
+        static int addScaler(int i, float s) {
+            i *= SIZE;
+            return createVec2(vec2s[i + X] + s, vec2s[i + Y] + s);
+        }
+
+        static int divScaler(int i, float s) {
+            i *= SIZE;
+            return createVec2(vec2s[i + X] / s, vec2s[i + Y] / s);
+        }
+
+        static int addVec2(int lhs, int rhs) {
+            lhs *= SIZE;
+            rhs *= SIZE;
+            return createVec2(vec2s[lhs + X] + vec2s[rhs + X], vec2s[lhs + Y] + vec2s[rhs + Y]);
+        }
+
+        static int subVec2(int lhs, int rhs) {
+            lhs *= SIZE;
+            rhs *= SIZE;
+            return createVec2(vec2s[lhs + X] - vec2s[rhs + X], vec2s[lhs + Y] - vec2s[rhs + Y]);
+        }
+
+
+        static float dotProd(int lhs, int rhs) {
+            lhs *= SIZE;
+            rhs *= SIZE;
+            return vec2s[lhs + X] * vec2s[rhs + X] + vec2s[lhs + Y] * vec2s[rhs + Y];
+        }
+
+        static String asString(int i) {
+            i *= SIZE;
+            return vec2s[i + X] + "," + vec2s[i + Y];
+        }
     }
 
     public static class Vec3 {
@@ -211,21 +332,23 @@ public class Main {
         // return another vec3 after multiplying by m4
         // we pad this vec3 to vec 4 with '1' as w
         // we normalize the result
-           static int  mulMat4(int i, int m4){
-            i*=SIZE;
-            m4*=Mat4.SIZE;
-                int o = createVec3(
-                        vec3s[i+X] * Mat4.mat4s[m4+Mat4.X0Y0] + vec3s[i+Y] * Mat4.mat4s[m4+Mat4.X0Y1] + vec3s[i+Z] * Mat4.mat4s[m4+Mat4.X0Y2] + 1f * Mat4.mat4s[m4+Mat4.X0Y3],
-                        vec3s[i+X] * Mat4.mat4s[m4+Mat4.X1Y0] + vec3s[i+Y] * Mat4.mat4s[m4+Mat4.X1Y1] + vec3s[i+Z] * Mat4.mat4s[m4+Mat4.X1Y2] + 1f * Mat4.mat4s[m4+Mat4.X1Y3],
-                        vec3s[i+X] * Mat4.mat4s[m4+Mat4.X2Y0] + vec3s[i+Y] * Mat4.mat4s[m4+Mat4.X2Y1] + vec3s[i+Z] * Mat4.mat4s[m4+Mat4.X2Y2] + 1f * Mat4.mat4s[m4+Mat4.X2Y3]
-                );
+        static int mulMat4(int i, int m4) {
+            i *= SIZE;
+            m4 *= Mat4.SIZE;
+            int o = createVec3(
+                    vec3s[i + X] * Mat4.mat4s[m4 + Mat4.X0Y0] + vec3s[i + Y] * Mat4.mat4s[m4 + Mat4.X0Y1] + vec3s[i + Z] * Mat4.mat4s[m4 + Mat4.X0Y2] + 1f * Mat4.mat4s[m4 + Mat4.X0Y3],
+                    vec3s[i + X] * Mat4.mat4s[m4 + Mat4.X1Y0] + vec3s[i + Y] * Mat4.mat4s[m4 + Mat4.X1Y1] + vec3s[i + Z] * Mat4.mat4s[m4 + Mat4.X1Y2] + 1f * Mat4.mat4s[m4 + Mat4.X1Y3],
+                    vec3s[i + X] * Mat4.mat4s[m4 + Mat4.X2Y0] + vec3s[i + Y] * Mat4.mat4s[m4 + Mat4.X2Y1] + vec3s[i + Z] * Mat4.mat4s[m4 + Mat4.X2Y2] + 1f * Mat4.mat4s[m4 + Mat4.X2Y3]
+            );
 
-                float w = vec3s[i+X] * Mat4.mat4s[m4+Mat4.X3Y0] + vec3s[i+Y] * Mat4.mat4s[m4+Mat4.X3Y1] + vec3s[i+Z] * Mat4.mat4s[m4+Mat4.X3Y2] + 1 * Mat4.mat4s[m4+Mat4.X3Y3];
-                if (w != 0.0) {
-                    vec3s[o*SIZE+X] /= w; vec3s[o*SIZE+Y] /= w; vec3s[o*SIZE+Z] /= w;
-                }
-                return o;
+            float w = vec3s[i + X] * Mat4.mat4s[m4 + Mat4.X3Y0] + vec3s[i + Y] * Mat4.mat4s[m4 + Mat4.X3Y1] + vec3s[i + Z] * Mat4.mat4s[m4 + Mat4.X3Y2] + 1 * Mat4.mat4s[m4 + Mat4.X3Y3];
+            if (w != 0.0) {
+                vec3s[o * SIZE + X] /= w;
+                vec3s[o * SIZE + Y] /= w;
+                vec3s[o * SIZE + Z] /= w;
             }
+            return o;
+        }
 
         static int mulScaler(int i, float s) {
             i *= SIZE;
@@ -245,13 +368,13 @@ public class Main {
         static int addVec3(int lhs, int rhs) {
             lhs *= SIZE;
             rhs *= SIZE;
-            return createVec3(vec3s[lhs + X] + vec3s[rhs + X], vec3s[lhs + Z] + vec3s[rhs + Z], vec3s[lhs + Z] + vec3s[rhs + Z]);
+            return createVec3(vec3s[lhs + X] + vec3s[rhs + X], vec3s[lhs + Y] + vec3s[rhs + Y], vec3s[lhs + Z] + vec3s[rhs + Z]);
         }
 
         static int subVec3(int lhs, int rhs) {
             lhs *= SIZE;
             rhs *= SIZE;
-            return createVec3(vec3s[lhs + X] - vec3s[rhs + X], vec3s[lhs + Z] - vec3s[rhs + Z], vec3s[lhs + Z] - vec3s[rhs + Z]);
+            return createVec3(vec3s[lhs + X] - vec3s[rhs + X], vec3s[lhs + Y] - vec3s[rhs + Y], vec3s[lhs + Z] - vec3s[rhs + Z]);
         }
 
 
@@ -268,11 +391,57 @@ public class Main {
             i *= SIZE;
             return vec3s[i + X] + "," + vec3s[i + Y] + "," + vec3s[i + Z];
         }
-
-
     }
 
-    public static class Triangles2D {
+    static class Triangle3D {
+        static final int SIZE = 4;
+        static final int MAX_TRIANGLES = 100;
+        static final int V0 = 0;
+        static final int V1 = 1;
+        static final int V2 = 2;
+        static final int RGB = 3;
+
+        static int triangleCount = 0;
+        static int triangles[] = new int[MAX_TRIANGLES * SIZE];
+
+        static int fillTriangle3D(int i, int v0, int v1, int v2, int rgb) {
+            i *= SIZE;
+            triangles[i + V0] = v0;
+            triangles[i + V1] = v1;
+            triangles[i + V2] = v2;
+            triangles[i + RGB] = rgb;
+            return i;
+        }
+
+        static int createTriangle3D(int v0, int v1, int v2, int rgb) {
+            fillTriangle3D(triangleCount, v0, v1, v2, rgb);
+            triangleCount++;
+            return triangleCount;
+        }
+
+        static String asString(int i) {
+            i *= SIZE;
+            return Vec3.asString(triangles[i + V0]) + " -> " + Vec3.asString(triangles[i + V1]) + " -> " + Vec3.asString(triangles[i + V2]) + " =" + triangles[i + RGB];
+        }
+
+        static int mulMat4(int i, int m4) {
+            i *= SIZE;
+            return createTriangle3D(Vec3.mulMat4(triangles[i + V0], m4), Vec3.mulMat4(triangles[i + V1], m4), Vec3.mulMat4(triangles[i + V2], m4), triangles[i + RGB]);
+        }
+
+        static int addVec3(int i, int v3) {
+            i *= SIZE;
+            return createTriangle3D(Vec3.addVec3(triangles[i + V0], v3), Vec3.addVec3(triangles[i + V1], v3), Vec3.addVec3(triangles[i + V2], v3), triangles[i + RGB]);
+        }
+
+        static int mulScaler(int i, float s) {
+            i *= SIZE;
+            return createTriangle3D(Vec3.mulScaler(triangles[i + V0], s), Vec3.mulScaler(triangles[i + V1], s), Vec3.mulScaler(triangles[i + V2], s), triangles[i + RGB]);
+        }
+    }
+
+
+    public static class Triangle2D {
         static final int SIZE = 6;
         static final int X0 = 0;
         static final int Y0 = 1;
@@ -362,8 +531,8 @@ public class Main {
             this.height = view.image.getHeight();
             this.range = Range.create(width * height);
             this.rgb = view.offscreenRgb;
-            this.triangles = Triangles2D.triangles;
-            this.triangleCount = Triangles2D.triangleCount;
+            this.triangles = Triangle2D.triangles;
+            this.triangleCount = Triangle2D.triangleCount;
         }
 
         public void resetImage(int _width, int _height, int[] _rgb) {
@@ -380,16 +549,16 @@ public class Main {
             final float y = ((((gid / width) * scale) - ((scale / 2) * height)) / height) + offsety;
 
             int col = 0x00000;
-            for (int t = 0; t < triangleCount * Triangles2D.SIZE; t += Triangles2D.SIZE) {
-                float x0 = triangles[Triangles2D.X0 + t];
-                float y0 = triangles[Triangles2D.Y0 + t];
-                float x1 = triangles[Triangles2D.X1 + t];
-                float y1 = triangles[Triangles2D.Y1 + t];
-                float x2 = triangles[Triangles2D.X2 + t];
-                float y2 = triangles[Triangles2D.Y2 + t];
-                if (Triangles2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
+            for (int t = 0; t < triangleCount * Triangle2D.SIZE; t += Triangle2D.SIZE) {
+                float x0 = triangles[Triangle2D.X0 + t];
+                float y0 = triangles[Triangle2D.Y0 + t];
+                float x1 = triangles[Triangle2D.X1 + t];
+                float y1 = triangles[Triangle2D.Y1 + t];
+                float x2 = triangles[Triangle2D.X2 + t];
+                float y2 = triangles[Triangle2D.Y2 + t];
+                if (Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
                     col = 0x00001 * t;
-                } else if (Triangles2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangles2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangles2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
+                } else if (Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
                     col = 0x010000 * t;
                 }
             }
@@ -413,9 +582,9 @@ public class Main {
     @SuppressWarnings("serial")
     public static void main(String[] _args) {
         final View view = new View(1024, 1024);
-       // Triangles2D vertices = new Triangles2D();
+        // Triangles2D vertices = new Triangles2D();
         for (int i = 0; i < 200; i++) {
-            Triangles2D.createRandomTriangle();
+            Triangle2D.createRandomTriangle();
         }
         final RasterKernel kernel = new RasterKernel(view);
         //  kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.GPU);
