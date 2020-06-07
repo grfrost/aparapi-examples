@@ -2,7 +2,7 @@ package com.aparapi.examples.view;
 
 class Triangle3D {
     static final int SIZE = 4;
-    static final int MAX = 100;
+    static final int MAX = 400;
     static final int V0 = 0;
     static final int V1 = 1;
     static final int V2 = 2;
@@ -67,26 +67,38 @@ class Triangle3D {
     }
 
     /*
-                -----------
+               a-----------d
               /|          /|
              / |         / |
-            ------------   |
+           h------------g  |
            |   |        |  |
-           |    --------|--
+           |   b--------|--c
            |  /         | /
            | /          |/
-            ------------
+           e------------f
 
      */
 
 
-    static void cube() {
-        quad(Vec3.createVec3(-.5f, -.5f, -.5f), Vec3.createVec3(-.5f, .5f, -.5f), Vec3.createVec3(.5f, .5f, -.5f), Vec3.createVec3(.5f, -.5f, -.5f), 0xff0000); //front
-        quad(Vec3.createVec3(-.5f, .5f, -.5f), Vec3.createVec3(-.5f, .5f, .5f), Vec3.createVec3(.5f, .5f, .5f), Vec3.createVec3(.5f, .5f, -.5f), 0x0000ff); //top
-        quad(Vec3.createVec3(.5f, -.5f, -.5f), Vec3.createVec3(.5f, .5f, -.5f), Vec3.createVec3(.5f, .5f, .5f), Vec3.createVec3(.5f, -.5f, .5f), 0xffff00); //right
-        quad(Vec3.createVec3(-.5f, -.5f, .5f), Vec3.createVec3(-.5f, .5f, .5f), Vec3.createVec3(-.5f, .5f, -.5f), Vec3.createVec3(-.5f, -.5f, -.5f), 0xffffff); //left
-        quad(Vec3.createVec3(.5f, -.5f, .5f), Vec3.createVec3(.5f, .5f, .5f), Vec3.createVec3(-.5f, .5f, .5f), Vec3.createVec3(-.5f, -.5f, .5f), 0x00ff00);//back
-        quad(Vec3.createVec3(.5f, -.5f, .5f), Vec3.createVec3(-.5f, -.5f, .5f), Vec3.createVec3(-.5f, -.5f, -.5f), Vec3.createVec3(.5f, -.5f, -.5f), 0xffa500);//bottom
+    static void cube(
+        float x,
+        float y,
+        float z,
+        float s){
+        int a = Vec3.createVec3(x-(s*.5f), y-(s*.5f), z-(s*.5f));
+        int b = Vec3.createVec3(x-(s*.5f), y+(s*.5f), z-(s*.5f));
+        int c = Vec3.createVec3(x+(s*.5f), y+(s*.5f), z-(s*.5f));
+        int d = Vec3.createVec3(x+(s*.5f), y-(s*.5f), z-(s*.5f));
+        int e = Vec3.createVec3(x-(s*.5f), y+(s*.5f), z+(s*.5f));
+        int f = Vec3.createVec3(x+(s*.5f), y+(s*.5f), z+(s*.5f));
+        int g = Vec3.createVec3(x+(s*.5f), y-(s*.5f), z+(s*.5f));
+        int h = Vec3.createVec3(x-(s*.5f), y-(s*.5f), z+(s*.5f));
+        quad(a, b, c, d, 0xff0000); //front
+        quad(b, e, f, c, 0x0000ff); //top
+        quad(d, c, f, g, 0xffff00); //right
+        quad(h, e, b, a, 0xffffff); //left
+        quad(g, f, e, h, 0x00ff00);//back
+        quad(g, h, a, d, 0xffa500);//bottom
     }
 
 

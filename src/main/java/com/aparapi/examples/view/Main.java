@@ -81,12 +81,17 @@ public class Main {
                 }
             });
 
-            Triangle3D.cube();
-
+            for (int x=-1; x<0; x++){
+                for (int y=-1; y<0; y++){
+                    for (int z=-1; z<2; z++){
+                        Triangle3D.cube(x*.5f,y*.5f,z*.5f, .4f);
+                    }
+                }
+            }
 
             cameraVec3 = Vec3.createVec3(0, 0, 0);
             lookDirVec3 = Vec3.createVec3(0, 0, 0);
-            projectionMat4 = Mat4.createProjectionMatrix(view.image.getWidth(), view.image.getHeight(), 0.1f, 1000f, 90f);
+            projectionMat4 = Mat4.createProjectionMatrix(view.image.getWidth(), view.image.getHeight(), 0.1f, 5f, 90f);
             centerVec3 = Vec3.createVec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
             moveAwayVec3 = Vec3.createVec3(0, 0, 6);
 
@@ -133,7 +138,7 @@ public class Main {
 
         void update(float scale, float x, float y) {
             final long elapsedMillis = System.currentTimeMillis() - startMillis;
-            float theta = elapsedMillis * .001f;
+            float theta = elapsedMillis * .0001f;
             if ((frames++ % 50) == 0) {
                 System.out.println("Frames " + frames + " Theta = " + theta + " FPS = " + ((frames * 1000) / elapsedMillis));
             }
@@ -180,9 +185,12 @@ public class Main {
                             normalY * (v0y - cameray) +
                             normalZ * (v0z - cameraz)) <= 0.0) {
 
+
+
                         int projected = Triangle3D.mulMat4(translatedTri, projectionMat4);
                         int centered = Triangle3D.mulScaler(projected, view.image.getHeight() / 4);
                         centered = Triangle3D.addScaler(centered, view.image.getHeight() / 2);
+                        
                         v0 = Triangle3D.getV0(centered);
                         v1 = Triangle3D.getV1(centered);
                         v2 = Triangle3D.getV2(centered);
@@ -217,7 +225,7 @@ public class Main {
         private int[] rgb;
         private int width;
         private int height;
-        static final float deltaSquare = 0.000001f;
+        static final float deltaSquare = 0.01f;
         Range range;
         float triangles[];
         float triangleCount;
@@ -254,8 +262,21 @@ public class Main {
                 float y2 = triangles[Triangle2D.Y2 + t * Triangle2D.SIZE];
                 if (Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
                     col = colors[t];
-                } else if (Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
-                    col = 0x000000;
+               // } else if (Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
+                 //   col = 0x000000;
+                }
+            }
+            for (int t = 0; t < triangleCount; t++) {
+                float x0 = triangles[Triangle2D.X0 + t * Triangle2D.SIZE];
+                float y0 = triangles[Triangle2D.Y0 + t * Triangle2D.SIZE];
+                float x1 = triangles[Triangle2D.X1 + t * Triangle2D.SIZE];
+                float y1 = triangles[Triangle2D.Y1 + t * Triangle2D.SIZE];
+                float x2 = triangles[Triangle2D.X2 + t * Triangle2D.SIZE];
+                float y2 = triangles[Triangle2D.Y2 + t * Triangle2D.SIZE];
+             //   if (Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
+                  //  col = colors[t];
+               if (Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
+                    col = 0xCCCCCC;
                 }
             }
             rgb[gid] = col;
