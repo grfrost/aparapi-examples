@@ -11,7 +11,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.io.File;
 import javax.swing.*;
 
 public class Main {
@@ -46,7 +45,9 @@ public class Main {
         int projectionMat4;
         int centerVec3;
         int moveAwayVec3;
-        int markedTriangles;
+        int markedTriangles3D;
+        int markedTriangles2D;
+        int markedVec2;
         int markedVec3;
         int markedMat4;
 
@@ -98,9 +99,11 @@ public class Main {
             centerVec3 = Vec3.createVec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
             moveAwayVec3 = Vec3.createVec3(0, 0, 6);
 
-            markedTriangles = Triangle3D.count;
+            markedTriangles3D = Triangle3D.count;
+            markedTriangles2D = Triangle2D.count;
             markedVec3 = Vec3.count;
             markedMat4 = Mat4.count;
+            markedVec2 = Vec2.count;
         }
 
         Point waitForPoint(long timeout) {
@@ -135,7 +138,9 @@ public class Main {
             }
 
             Vec3.count = markedVec3;
-            Triangle3D.count = markedTriangles;
+            Vec2.count = markedVec2;
+            Triangle3D.count = markedTriangles3D;
+            Triangle2D.count = markedTriangles2D;
             Mat4.count = markedMat4;
 
             int rotXMat4 = Mat4.createRotXMat4(theta * 2);
@@ -180,12 +185,11 @@ public class Main {
                 Triangle3D.count = resetTriangle3;
                 Mat4.count = resetMat4;
             }
-
-            kernel.triangles = Triangle2D.entries;
+            kernel.triangle2DEntries = Triangle2D.entries;
+            kernel.triangle2DEntriesCount = Triangle2D.count;
+            kernel.vec2Entries = Vec2.entries;
+            kernel.vec2EntriesCount= Vec2.count;
             kernel.colors = Triangle2D.colors;
-            kernel.triangleCount = Triangle2D.count;
-
-
             kernel.execute(kernel.range);
             view.update();
             viewer.repaint();
@@ -199,9 +203,12 @@ public class Main {
         private int height;
         static final float deltaSquare = 0.1f;
         Range range;
-        float triangles[];
-        float triangleCount;
+        int triangle2DEntries[];
+        int triangle2DEntriesCount;
+        float vec2Entries[];
+        int vec2EntriesCount;
         int colors[];
+
 
         public RasterKernel(View view) {
             this.view = view;
@@ -209,8 +216,6 @@ public class Main {
             this.height = view.image.getHeight();
             this.range = Range.create(width * height);
             this.rgb = view.offscreenRgb;
-            this.triangles = Triangle2D.entries;
-            this.triangleCount = Triangle2D.count;
         }
 
         public void resetImage(int _width, int _height, int[] _rgb) {
@@ -225,18 +230,22 @@ public class Main {
             float x = gid % width;
             float y = gid / width;
             int col = 0x00000;
-            for (int t = 0; t < triangleCount; t++) {
-                float x0 = triangles[Triangle2D.X0 + t * Triangle2D.SIZE];
-                float y0 = triangles[Triangle2D.Y0 + t * Triangle2D.SIZE];
-                float x1 = triangles[Triangle2D.X1 + t * Triangle2D.SIZE];
-                float y1 = triangles[Triangle2D.Y1 + t * Triangle2D.SIZE];
-                float x2 = triangles[Triangle2D.X2 + t * Triangle2D.SIZE];
-                float y2 = triangles[Triangle2D.Y2 + t * Triangle2D.SIZE];
+            for (int t = 0; t < triangle2DEntriesCount; t++) {
+                int v0 = triangle2DEntries[Triangle2D.SIZE *t +Triangle2D.V0];
+                int v1 = triangle2DEntries[Triangle2D.SIZE *t +Triangle2D.V1];
+                int v2 = triangle2DEntries[Triangle2D.SIZE *t +Triangle2D.V2];
+                float x0 = vec2Entries[v0*Vec2.SIZE + Vec2.X];
+                float y0 = vec2Entries[v0*Vec2.SIZE + Vec2.Y];
+                float x1 = vec2Entries[v1*Vec2.SIZE + Vec2.X];
+                float y1 = vec2Entries[v1*Vec2.SIZE + Vec2.Y];
+                float x2 = vec2Entries[v2*Vec2.SIZE + Vec2.X];
+                float y2 = vec2Entries[v2*Vec2.SIZE + Vec2.Y];
                 if (Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
+                //if (Triangle2D.intriangle(triangle2DEntries, x, y, v0,v1, y1, x2, y)) {
                     col = colors[t];
-                    } else if (Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
+                   /* } else if (Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
                     col = 0xCCCCCC;
-
+                     */
                 }
             }
 
@@ -250,7 +259,7 @@ public class Main {
     public static void main(String[] _args) {
         final View view = new View(1024, 1024);
         final RasterKernel kernel = new RasterKernel(view);
-        // kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.JTP);
+       // kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.JTP);
         ViewFrame vf = new ViewFrame("View", kernel);
 
         for (Point point = vf.waitForPoint(10); point != null; point = vf.waitForPoint(10)) {
