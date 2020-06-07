@@ -44,6 +44,10 @@ class Triangle3D {
         i *= SIZE;
         return createTriangle3D(Vec3.mulScaler(entries[i + V0], s), Vec3.mulScaler(entries[i + V1], s), Vec3.mulScaler(entries[i + V2], s), entries[i + RGB]);
     }
+    static int addScaler(int i, float s) {
+        i *= SIZE;
+        return createTriangle3D(Vec3.addScaler(entries[i + V0], s), Vec3.addScaler(entries[i + V1], s), Vec3.addScaler(entries[i + V2], s), entries[i + RGB]);
+    }
 
     static int quad(int v0, int v1, int v2, int v3, int col) {
   /*
@@ -62,14 +66,27 @@ class Triangle3D {
         return createTriangle3D(v0, v2, v3, col) - 1;
     }
 
+    /*
+                -----------
+              /|          /|
+             / |         / |
+            ------------   |
+           |   |        |  |
+           |    --------|--
+           |  /         | /
+           | /          |/
+            ------------
+
+     */
+
 
     static void cube() {
-        quad(Vec3.createVec3(0, 0, 0), Vec3.createVec3(0, 1, 0), Vec3.createVec3(1, 1, 0), Vec3.createVec3(1, 0, 0), 0xff0000); //front
-        quad(Vec3.createVec3(0, 1, 0), Vec3.createVec3(0, 1, 1), Vec3.createVec3(1, 1, 1), Vec3.createVec3(1, 1, 0), 0x0000ff); //top
-        quad(Vec3.createVec3(1, 0, 0), Vec3.createVec3(1, 1, 0), Vec3.createVec3(1, 1, 1), Vec3.createVec3(1, 0, 1), 0xffff00); //right
-        quad(Vec3.createVec3(0, 0, 1), Vec3.createVec3(0, 1, 1), Vec3.createVec3(0, 1, 0), Vec3.createVec3(0, 0, 0), 0xffffff); //left
-        quad(Vec3.createVec3(1, 0, 1), Vec3.createVec3(1, 1, 1), Vec3.createVec3(0, 1, 1), Vec3.createVec3(0, 0, 1), 0x00ff00);//back
-        quad(Vec3.createVec3(1, 0, 1), Vec3.createVec3(0, 0, 1), Vec3.createVec3(0, 0, 0), Vec3.createVec3(1, 0, 0), 0xffa500);//bottom
+        quad(Vec3.createVec3(-.5f, -.5f, -.5f), Vec3.createVec3(-.5f, .5f, -.5f), Vec3.createVec3(.5f, .5f, -.5f), Vec3.createVec3(.5f, -.5f, -.5f), 0xff0000); //front
+        quad(Vec3.createVec3(-.5f, .5f, -.5f), Vec3.createVec3(-.5f, .5f, .5f), Vec3.createVec3(.5f, .5f, .5f), Vec3.createVec3(.5f, .5f, -.5f), 0x0000ff); //top
+        quad(Vec3.createVec3(.5f, -.5f, -.5f), Vec3.createVec3(.5f, .5f, -.5f), Vec3.createVec3(.5f, .5f, .5f), Vec3.createVec3(.5f, -.5f, .5f), 0xffff00); //right
+        quad(Vec3.createVec3(-.5f, -.5f, .5f), Vec3.createVec3(-.5f, .5f, .5f), Vec3.createVec3(-.5f, .5f, -.5f), Vec3.createVec3(-.5f, -.5f, -.5f), 0xffffff); //left
+        quad(Vec3.createVec3(.5f, -.5f, .5f), Vec3.createVec3(.5f, .5f, .5f), Vec3.createVec3(-.5f, .5f, .5f), Vec3.createVec3(-.5f, -.5f, .5f), 0x00ff00);//back
+        quad(Vec3.createVec3(.5f, -.5f, .5f), Vec3.createVec3(-.5f, -.5f, .5f), Vec3.createVec3(-.5f, -.5f, -.5f), Vec3.createVec3(.5f, -.5f, -.5f), 0xffa500);//bottom
     }
 
 

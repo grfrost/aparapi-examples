@@ -14,8 +14,6 @@ import java.awt.image.DataBufferInt;
 import javax.swing.*;
 
 public class Main {
-
-
     public static class View {
         private BufferedImage image;
         int[] offscreenRgb;
@@ -86,12 +84,11 @@ public class Main {
             Triangle3D.cube();
 
 
-
-            cameraVec3 = Vec3.createVec3(0,0,0);
-            lookDirVec3 = Vec3.createVec3(0,0,0);
+            cameraVec3 = Vec3.createVec3(0, 0, 0);
+            lookDirVec3 = Vec3.createVec3(0, 0, 0);
             projectionMat4 = Mat4.createProjectionMatrix(view.image.getWidth(), view.image.getHeight(), 0.1f, 1000f, 90f);
-            centerVec3 = Vec3.createVec3(view.image.getWidth()/2,view.image.getHeight()/2,0);
-            moveAwayVec3 = Vec3.createVec3(0,0,6);
+            centerVec3 = Vec3.createVec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
+            moveAwayVec3 = Vec3.createVec3(0, 0, 6);
 
             markedTriangles = Triangle3D.count;
             markedVec3 = Vec3.count;
@@ -121,7 +118,7 @@ public class Main {
             }
         }
 
-        static void dump(int tri){
+        static void dump(int tri) {
             int v0 = Triangle3D.getV0(tri);
             int v1 = Triangle3D.getV1(tri);
             int v2 = Triangle3D.getV2(tri);
@@ -136,26 +133,26 @@ public class Main {
 
         void update(float scale, float x, float y) {
             final long elapsedMillis = System.currentTimeMillis() - startMillis;
-            float theta = elapsedMillis*.001f;
-            if( (frames++ %50) ==0) {
-                System.out.println("Frames "+frames+" Theta = "+theta+" FPS = " + ((frames * 1000) / elapsedMillis));
+            float theta = elapsedMillis * .001f;
+            if ((frames++ % 50) == 0) {
+                System.out.println("Frames " + frames + " Theta = " + theta + " FPS = " + ((frames * 1000) / elapsedMillis));
             }
 
-            Vec3.count=markedVec3;
-            Triangle3D.count=markedTriangles;
+            Vec3.count = markedVec3;
+            Triangle3D.count = markedTriangles;
             Mat4.count = markedMat4;
-            int  rotXMat4 = Mat4.createRotXMat4(theta*2);
-            int rotYMat4 = Mat4.createRotYMat4(theta/2);
+            int rotXMat4 = Mat4.createRotXMat4(theta * 2);
+            int rotYMat4 = Mat4.createRotYMat4(theta / 2);
             int rotZMat4 = Mat4.createRotZMat4(theta);
-            int  rotXYMat4 = Mat4.mulMat4(rotXMat4, rotYMat4);
-            int  rotXYZMat4 = Mat4.mulMat4(rotXYMat4, rotZMat4);
+            int rotXYMat4 = Mat4.mulMat4(rotXMat4, rotYMat4);
+            int rotXYZMat4 = Mat4.mulMat4(rotXYMat4, rotZMat4);
             int resetVec3 = Vec3.count;
             int resetTriangle3 = Triangle3D.count;
             int resetMat4 = Mat4.count;
-            Triangle2D.count=0;
-            for (int t = 0; t<Triangle3D.count; t++){
-                int rotatedTri =  Triangle3D.mulMat4(t, rotXYZMat4);
-                int translatedTri =  Triangle3D.addVec3(rotatedTri, moveAwayVec3);
+            Triangle2D.count = 0;
+            for (int t = 0; t < Triangle3D.count; t++) {
+                int rotatedTri = Triangle3D.mulMat4(t, rotXYZMat4);
+                int translatedTri = Triangle3D.addVec3(rotatedTri, moveAwayVec3);
                 int v0 = Triangle3D.getV0(translatedTri);
                 int v1 = Triangle3D.getV1(translatedTri);
                 int v2 = Triangle3D.getV2(translatedTri);
@@ -164,11 +161,11 @@ public class Main {
                 int line2Vec3 = Vec3.subVec3(v2, v0);
                 int normalVec3 = Vec3.dotProd(line1Vec3, line2Vec3);
 
-                float sumOfSquares =  Vec3.sumOfSquares(normalVec3);
+                float sumOfSquares = Vec3.sumOfSquares(normalVec3);
 
-                int rgb =  Triangle3D.getRGB(translatedTri);
+                int rgb = Triangle3D.getRGB(translatedTri);
 
-                if (sumOfSquares!=0){
+                if (sumOfSquares != 0) {
                     normalVec3 = Vec3.divScaler(normalVec3, sumOfSquares);
                     float normalX = Vec3.getX(normalVec3);
                     float normalY = Vec3.getY(normalVec3);
@@ -179,12 +176,13 @@ public class Main {
                     float camerax = Vec3.getX(cameraVec3);
                     float cameray = Vec3.getY(cameraVec3);
                     float cameraz = Vec3.getZ(cameraVec3);
-                    if((normalX * (v0x - camerax) +
+                    if ((normalX * (v0x - camerax) +
                             normalY * (v0y - cameray) +
-                            normalZ * (v0z - cameraz)) <= 0.0){
+                            normalZ * (v0z - cameraz)) <= 0.0) {
 
                         int projected = Triangle3D.mulMat4(translatedTri, projectionMat4);
-                        int centered = Triangle3D.mulScaler(projected, .5f);
+                        int centered = Triangle3D.mulScaler(projected, view.image.getHeight() / 4);
+                        centered = Triangle3D.addScaler(centered, view.image.getHeight() / 2);
                         v0 = Triangle3D.getV0(centered);
                         v1 = Triangle3D.getV1(centered);
                         v2 = Triangle3D.getV2(centered);
@@ -200,15 +198,14 @@ public class Main {
                     }
                 }
 
-                Vec3.count=resetVec3;
-                Triangle3D.count=resetTriangle3;
+                Vec3.count = resetVec3;
+                Triangle3D.count = resetTriangle3;
                 Mat4.count = resetMat4;
             }
 
-            kernel.triangles=Triangle2D.entries;
+            kernel.triangles = Triangle2D.entries;
             kernel.colors = Triangle2D.colors;
             kernel.triangleCount = Triangle2D.count;
-            kernel.setScaleAndOffset(scale, x, y);
             kernel.execute(kernel.range);
             view.update();
             viewer.repaint();
@@ -220,16 +217,8 @@ public class Main {
         private int[] rgb;
         private int width;
         private int height;
-
-        private float scale = .0f;
-        private float offsetx = .0f;
-        private float offsety = .0f;
-
-
         static final float deltaSquare = 0.000001f;
-
         Range range;
-
         float triangles[];
         float triangleCount;
         int colors[];
@@ -253,18 +242,16 @@ public class Main {
         @Override
         public void run() {
             final int gid = getGlobalId();
-
-            final float x = ((((gid % width) * scale) - ((scale / 2) * width)) / width) + offsetx;
-            final float y = ((((gid / width) * scale) - ((scale / 2) * height)) / height) + offsety;
-
+            float x = gid % width;
+            float y = gid / width;
             int col = 0x00000;
             for (int t = 0; t < triangleCount; t++) {
-                float x0 = triangles[Triangle2D.X0 + t*Triangle2D.SIZE];
-                float y0 = triangles[Triangle2D.Y0 + t*Triangle2D.SIZE];
-                float x1 = triangles[Triangle2D.X1 + t*Triangle2D.SIZE];
-                float y1 = triangles[Triangle2D.Y1 + t*Triangle2D.SIZE];
-                float x2 = triangles[Triangle2D.X2 + t*Triangle2D.SIZE];
-                float y2 = triangles[Triangle2D.Y2 + t*Triangle2D.SIZE];
+                float x0 = triangles[Triangle2D.X0 + t * Triangle2D.SIZE];
+                float y0 = triangles[Triangle2D.Y0 + t * Triangle2D.SIZE];
+                float x1 = triangles[Triangle2D.X1 + t * Triangle2D.SIZE];
+                float y1 = triangles[Triangle2D.Y1 + t * Triangle2D.SIZE];
+                float x2 = triangles[Triangle2D.X2 + t * Triangle2D.SIZE];
+                float y2 = triangles[Triangle2D.Y2 + t * Triangle2D.SIZE];
                 if (Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
                     col = colors[t];
                 } else if (Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
@@ -274,16 +261,6 @@ public class Main {
             rgb[gid] = col;
         }
 
-        public void setScaleAndOffset(float _scale, float _offsetx, float _offsety) {
-            offsetx = _offsetx;
-            offsety = _offsety;
-            scale = _scale;
-        }
-
-        public int[] getRgbs() {
-            return rgb;
-        }
-
     }
 
 
@@ -291,7 +268,7 @@ public class Main {
     public static void main(String[] _args) {
         final View view = new View(1024, 1024);
         final RasterKernel kernel = new RasterKernel(view);
-         // kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.JTP);
+        // kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.JTP);
         ViewFrame vf = new ViewFrame("View", kernel);
 
         final float defaultScale = 3f;
