@@ -62,10 +62,20 @@ public class Vec3 {
         rhs *= SIZE;
         return createVec3(entries[lhs + X] - entries[rhs + X], entries[lhs + Y] - entries[rhs + Y], entries[lhs + Z] - entries[rhs + Z]);
     }
+    static int mulVec3(int lhs, int rhs) {
+        lhs *= SIZE;
+        rhs *= SIZE;
+        return createVec3(entries[lhs + X] * entries[rhs + X], entries[lhs + Y] * entries[rhs + Y], entries[lhs + Z] * entries[rhs + Z]);
+    }
+
 
     static float sumOfSquares(int i) {
         i *= SIZE;
         return entries[i + X] * entries[i + X] + entries[i + Y] * entries[i + Y] + entries[i + Z] * entries[i + Z];
+    }
+    static float sumOf(int i) {
+        i *= SIZE;
+        return entries[i + X]  + entries[i + Y] + entries[i + Z] ;
     }
 
     static float hypot(int i) {

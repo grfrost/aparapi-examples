@@ -26,7 +26,7 @@ public class Triangle2D {
         float dxl = x1 - x0;
         float dyl = y1 - y0;
         float cross = (x - x0) * dyl - (y - y0) * dxl;
-        if (cross * cross < deltaSquare) {
+        if ((cross * cross) < deltaSquare) {
             if (dxl * dxl >= dyl * dyl)
                 return dxl > 0 ? x0 <= x && x <= x1 : x1 <= x && x <= x0;
             else
