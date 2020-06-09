@@ -86,12 +86,12 @@ public class Main {
             for (int x = -1; x < 0; x++) {
                 for (int y = -1; y < 0; y++) {
                     for (int z = -1; z < 2; z++) {
-                       // Triangle3D.cube(x * .5f, y * .5f, z * .5f, .4f);
+                        Triangle3D.cube(x * .5f, y * .5f, z * .5f, .4f);
                     }
                 }
             }
-            Triangle3D.cubeoctahedron(0,0,0,2);
-           // Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
+            Triangle3D.cubeoctahedron(0, 0, 0, 2);
+            // Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
 
             cameraVec3 = Vec3.createVec3(0, 0, 0);
             lookDirVec3 = Vec3.createVec3(0, 0, 0);
@@ -154,6 +154,7 @@ public class Main {
             int resetMat4 = Mat4.count;
 
             Triangle2D.count = 0;
+         //   NonVecTriangle2D.count = 0;
             for (int t = 0; t < Triangle3D.count; t++) {
                 int rotatedTri = Triangle3D.mulMat4(t, rotXYZMat4);
                 int translatedTri = Triangle3D.addVec3(rotatedTri, moveAwayVec3);
@@ -178,6 +179,7 @@ public class Main {
                         int centered = Triangle3D.mulScaler(projected, view.image.getHeight() / 4);
                         centered = Triangle3D.addScaler(centered, view.image.getHeight() / 2);
                         Triangle3D.createTriangle2D(centered, rgb);
+                     //   Triangle3D.createNonVecTriangle2D(centered, rgb);
                     }
                 }
 
@@ -188,8 +190,10 @@ public class Main {
             kernel.triangle2DEntries = Triangle2D.entries;
             kernel.triangle2DEntriesCount = Triangle2D.count;
             kernel.vec2Entries = Vec2.entries;
-            kernel.vec2EntriesCount= Vec2.count;
+            kernel.vec2EntriesCount = Vec2.count;
             kernel.colors = Triangle2D.colors;
+         //   kernel.triangles = NonVecTriangle2D.entries;
+          //  kernel.triangleCount = NonVecTriangle2D.count;
             kernel.execute(kernel.range);
             view.update();
             viewer.repaint();
@@ -201,13 +205,15 @@ public class Main {
         private int[] rgb;
         private int width;
         private int height;
-        static final float deltaSquare = 0.1f;
+        static final float deltaSquare = 10000f;
         Range range;
         int triangle2DEntries[];
         int triangle2DEntriesCount;
         float vec2Entries[];
         int vec2EntriesCount;
         int colors[];
+        int triangleCount;
+        float[] triangles;
 
 
         public RasterKernel(View view) {
@@ -223,29 +229,50 @@ public class Main {
             height = _height;
             rgb = _rgb;
         }
+/*
+        public void nonvecrun() {
+            final int gid = getGlobalId();
+            float x = gid % width;
+            float y = gid / width;
+            int col = 0x00000;
+            for (int t = 0; t < triangleCount; t++) {
+                float x0 = triangles[NonVecTriangle2D.X0 + t * NonVecTriangle2D.SIZE];
+                float y0 = triangles[NonVecTriangle2D.Y0 + t * NonVecTriangle2D.SIZE];
+                float x1 = triangles[NonVecTriangle2D.X1 + t * NonVecTriangle2D.SIZE];
+                float y1 = triangles[NonVecTriangle2D.Y1 + t * NonVecTriangle2D.SIZE];
+                float x2 = triangles[NonVecTriangle2D.X2 + t * NonVecTriangle2D.SIZE];
+                float y2 = triangles[NonVecTriangle2D.Y2 + t * NonVecTriangle2D.SIZE];
+                if (NonVecTriangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
+                    col = colors[t];
+                } else
+                  if (NonVecTriangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || NonVecTriangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || NonVecTriangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
+                    col = 0xFF0000;
+                }
+            }
+            rgb[gid] = col;
+        }
+*/
 
-        @Override
         public void run() {
             final int gid = getGlobalId();
             float x = gid % width;
             float y = gid / width;
             int col = 0x00000;
             for (int t = 0; t < triangle2DEntriesCount; t++) {
-                int v0 = triangle2DEntries[Triangle2D.SIZE *t +Triangle2D.V0];
-                int v1 = triangle2DEntries[Triangle2D.SIZE *t +Triangle2D.V1];
-                int v2 = triangle2DEntries[Triangle2D.SIZE *t +Triangle2D.V2];
-                float x0 = vec2Entries[v0*Vec2.SIZE + Vec2.X];
-                float y0 = vec2Entries[v0*Vec2.SIZE + Vec2.Y];
-                float x1 = vec2Entries[v1*Vec2.SIZE + Vec2.X];
-                float y1 = vec2Entries[v1*Vec2.SIZE + Vec2.Y];
-                float x2 = vec2Entries[v2*Vec2.SIZE + Vec2.X];
-                float y2 = vec2Entries[v2*Vec2.SIZE + Vec2.Y];
+                int v0 = triangle2DEntries[Triangle2D.SIZE * t + Triangle2D.V0];
+                int v1 = triangle2DEntries[Triangle2D.SIZE * t + Triangle2D.V1];
+                int v2 = triangle2DEntries[Triangle2D.SIZE * t + Triangle2D.V2];
+                float x0 = vec2Entries[v0 * Vec2.SIZE + Vec2.X];
+                float y0 = vec2Entries[v0 * Vec2.SIZE + Vec2.Y];
+                float x1 = vec2Entries[v1 * Vec2.SIZE + Vec2.X];
+                float y1 = vec2Entries[v1 * Vec2.SIZE + Vec2.Y];
+                float x2 = vec2Entries[v2 * Vec2.SIZE + Vec2.X];
+                float y2 = vec2Entries[v2 * Vec2.SIZE + Vec2.Y];
                 if (Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
-                //if (Triangle2D.intriangle(triangle2DEntries, x, y, v0,v1, y1, x2, y)) {
                     col = colors[t];
-                   /* } else if (Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
-                    col = 0xCCCCCC;
-                     */
+                    } else if (Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
+                    col = 0x000000;
+
                 }
             }
 
@@ -259,11 +286,11 @@ public class Main {
     public static void main(String[] _args) {
         final View view = new View(1024, 1024);
         final RasterKernel kernel = new RasterKernel(view);
-       // kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.JTP);
+        kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.CPU);
         ViewFrame vf = new ViewFrame("View", kernel);
 
         for (Point point = vf.waitForPoint(10); point != null; point = vf.waitForPoint(10)) {
-            System.out.println("You pressed "+point);
+            System.out.println("You pressed " + point);
         }
 
     }

@@ -2,7 +2,7 @@ package com.aparapi.examples.view;
 
 public class Vec2 {
     static final int SIZE = 2;
-    static final int MAX = 100;
+    static final int MAX = 200;
     static final int X = 0;
     static final int Y = 1;
 
