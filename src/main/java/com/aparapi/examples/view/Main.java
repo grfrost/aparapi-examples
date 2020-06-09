@@ -11,6 +11,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.File;
 import javax.swing.*;
 
 public class Main {
@@ -86,12 +87,12 @@ public class Main {
             for (int x = -1; x < 0; x++) {
                 for (int y = -1; y < 0; y++) {
                     for (int z = -1; z < 2; z++) {
-                        Triangle3D.cube(x * .5f, y * .5f, z * .5f, .4f);
+                       // Triangle3D.cube(x * .5f, y * .5f, z * .5f, .4f);
                     }
                 }
             }
-            Triangle3D.cubeoctahedron(0, 0, 0, 2);
-            // Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
+          //  Triangle3D.cubeoctahedron(0, 0, 0, 2);
+             Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
 
             cameraVec3 = Vec3.createVec3(0, 0, 0);
             lookDirVec3 = Vec3.createVec3(0, 0, 0);
@@ -134,7 +135,7 @@ public class Main {
             float theta = elapsedMillis * .001f;
 
             if ((frames++ % 50) == 0) {
-                System.out.println("Frames " + frames + " Theta = " + theta + " FPS = " + ((frames * 1000) / elapsedMillis));
+              //  System.out.println("Frames " + frames + " Theta = " + theta + " FPS = " + ((frames * 1000) / elapsedMillis));
             }
 
             Vec3.count = markedVec3;
@@ -174,11 +175,13 @@ public class Main {
                     normalVec3 = Vec3.divScaler(normalVec3, sumOfSquares);
                     int v0Minuscamera = Vec3.subVec3(v0, cameraVec3);
                     int play = Vec3.mulVec3(v0Minuscamera, normalVec3);
-                    if (Vec3.sumOf(play) <= 0.0) {
+                    float sumOfPLay = Vec3.sumOf(play);
+                    if (sumOfPLay <= 0.0) {
                         int projected = Triangle3D.mulMat4(translatedTri, projectionMat4);
                         int centered = Triangle3D.mulScaler(projected, view.image.getHeight() / 4);
                         centered = Triangle3D.addScaler(centered, view.image.getHeight() / 2);
-                        Triangle3D.createTriangle2D(centered, rgb);
+                        Triangle3D.createTriangle2D(centered, rgb, sumOfPLay);
+                       // System.out.println("sum of play " +sumOfPLay);
                      //   Triangle3D.createNonVecTriangle2D(centered, rgb);
                     }
                 }
@@ -192,6 +195,7 @@ public class Main {
             kernel.vec2Entries = Vec2.entries;
             kernel.vec2EntriesCount = Vec2.count;
             kernel.colors = Triangle2D.colors;
+            kernel.normals =Triangle2D.normals;
          //   kernel.triangles = NonVecTriangle2D.entries;
           //  kernel.triangleCount = NonVecTriangle2D.count;
             kernel.execute(kernel.range);
@@ -212,6 +216,7 @@ public class Main {
         float vec2Entries[];
         int vec2EntriesCount;
         int colors[];
+        float normals[];
         int triangleCount;
         float[] triangles;
 
@@ -269,10 +274,12 @@ public class Main {
                 float x2 = vec2Entries[v2 * Vec2.SIZE + Vec2.X];
                 float y2 = vec2Entries[v2 * Vec2.SIZE + Vec2.Y];
                 if (Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
-                    col = colors[t];
+                       int r = (int)(0xff0000 - (3*-normals[t]));
+                    int g = (int)(0x00ff00 - (3*-normals[t]));
+                       int b = (int)(0x0000ff - (3*-normals[t]));
+                       col = (r&0xff)<<16|(g&0xff)<<8|(b&0xff);
                     } else if (Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
-                    col = 0x000000;
-
+                       col = 0x000000;
                 }
             }
 

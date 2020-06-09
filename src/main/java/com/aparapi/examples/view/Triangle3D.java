@@ -215,11 +215,12 @@ http://paulbourke.net/dataformats/obj/
         return Triangle3D.entries[i + Triangle3D.RGB];
     }
 
-    public static int createTriangle2D(int i, int rgb) {
+
+    public static int createTriangle2D(int i, int rgb, float normal) {
         int v0 = Triangle3D.getV0(i);
         int v1 = Triangle3D.getV1(i);
         int v2 = Triangle3D.getV2(i);
-        return Triangle2D.createTriangle(Vec3.getX(v0), Vec3.getY(v0), Vec3.getX(v1), Vec3.getY(v1), Vec3.getX(v2), Vec3.getY(v2), rgb);
+        return Triangle2D.createTriangle(Vec3.getX(v0), Vec3.getY(v0), Vec3.getX(v1), Vec3.getY(v1), Vec3.getX(v2), Vec3.getY(v2), rgb, normal);
     }
     public static int createNonVecTriangle2D(int i, int rgb) {
         int v0 = Triangle3D.getV0(i);

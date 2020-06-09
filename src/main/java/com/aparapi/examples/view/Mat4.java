@@ -92,8 +92,9 @@ public class Mat4 {
         float aspectRatio = height / width;
         float fieldOfViewRadians = (float) (1.0f / Math.tan((fieldOfViewDeg * 0.5f) / 180.0 * Math.PI));
 
-            /*  https://youtu.be/ih20l3pJoeU?t=973
-
+            /*
+              https://youtu.be/ih20l3pJoeU?t=973
+              https://stackoverflow.com/questions/28075743/how-do-i-compose-a-rotation-matrix-with-human-readable-angles-from-scratch/28084380#28084380^
              --------------------            far
               \                /              ^    ^
                \              /               |    |   far-near

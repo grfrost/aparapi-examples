@@ -10,7 +10,7 @@ public class Triangle2D {
 
     public static int[] entries = new int[MAX * SIZE];
     public static int[] colors = new int[MAX];
-
+    public static float[] normals = new float[MAX];
     public static float side(float x, float y, float x0, float y0, float x1, float y1) {
         return (y1 - y0) * (x - x0) + (-x1 + x0) * (y - y0);
     }
@@ -43,7 +43,7 @@ public class Triangle2D {
         }
     }
 
-    static int createTriangle(float x0, float y0, float x1, float y1, float x2, float y2, int col) {
+    static int createTriangle(float x0, float y0, float x1, float y1, float x2, float y2, int col, float normal) {
         entries[count * SIZE + V0] = Vec2.createVec2(x0,y0);
         // We need the triangle to be clock wound
         if (side(x0, y0, x1, y1, x2, y2) > 0) {
@@ -54,10 +54,11 @@ public class Triangle2D {
             entries[count * SIZE + V2] = Vec2.createVec2(x1,y1);
         }
         colors[count] = col;
+        normals[count] = normal;
         return count++;
     }
 
-    static int createTriangle(int v0, int v1, int v2, int col) {
+    static int createTriangle(int v0, int v1, int v2, int col, float normal) {
         entries[count * SIZE + V0] = v0;
         // We need the triangle to be clock wound
         if (side(v0, v1, v2) > 0) {
@@ -68,6 +69,7 @@ public class Triangle2D {
             entries[count * SIZE + V2] = v1;
         }
         colors[count] = col;
+        normals[count] = normal;
         return count++;
     }
 }
