@@ -284,12 +284,12 @@ public class Main {
 
     @SuppressWarnings("serial")
     public static void main(String[] _args) {
-        final View view = new View(1024, 1024);
+        final View view = new View(1024+256, 1024+256);
         final RasterKernel kernel = new RasterKernel(view);
-        kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.CPU);
+        kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.GPU);
         ViewFrame vf = new ViewFrame("View", kernel);
 
-        for (Point point = vf.waitForPoint(10); point != null; point = vf.waitForPoint(10)) {
+        for (Point point = vf.waitForPoint(1); point != null; point = vf.waitForPoint(10)) {
             System.out.println("You pressed " + point);
         }
 
