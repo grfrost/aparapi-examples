@@ -110,7 +110,10 @@ public class Main {
                     }
                 }
             }
-            F32Triangle3D.cubeoctahedron(0, 0, 0, 2);
+           // F32Triangle3D.cubeoctahedron(0, 0, 0, 4);
+            F32Triangle3D.eliteload("WORM");
+
+
           //   Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
 
             cameraVec3 = F32Vec3.createVec3(0, 0, 0);
@@ -163,6 +166,8 @@ public class Main {
 
             Mark resetMark = new Mark();
 
+            boolean hide =false;
+
 
             I32Triangle2D.count = 0;
             for (int t = 0; t < F32Triangle3D.count; t++) {
@@ -180,12 +185,12 @@ public class Main {
 
                 int rgb = F32Triangle3D.getRGB(translatedTri);
 
-                if (sumOfSquares != 0) {
+                if (!hide || sumOfSquares != 0) {
                     normalVec3 = F32Vec3.divScaler(normalVec3, sumOfSquares);
                     int v0Minuscamera = F32Vec3.subVec3(v0, cameraVec3);
                     int play = F32Vec3.mulVec3(v0Minuscamera, normalVec3);
                     float sumOfPLay = F32Vec3.sumOf(play);
-                    if (sumOfPLay <= 0.0) {
+                    if (!hide || sumOfPLay <= 0.0) {
                         int projected = F32Triangle3D.mulMat4(translatedTri, projectionMat4);
                         int centered = F32Triangle3D.mulScaler(projected, view.image.getHeight() / 4);
                         centered = F32Triangle3D.addScaler(centered, view.image.getHeight() / 2);
@@ -211,7 +216,7 @@ public class Main {
         private int[] rgb;
         private int width;
         private int height;
-        static final float deltaSquare = 10000f;
+        static final float deltaSquare = 1000f;
         Range range;
         int triangle2DEntries[];
         int triangle2DEntriesCount;
@@ -252,11 +257,11 @@ public class Main {
                 int x2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.X];
                 int y2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.Y];
              //   if (I32Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
-                 //      int r = (int)(0xff0000 - (3*-normals[t]));
-                  //  int g = (int)(0x00ff00 - (3*-normals[t]));
-                   //    int b = (int)(0x0000ff - (3*-normals[t]));
-                    //   col = (r&0xff)<<16|(g&0xff)<<8|(b&0xff);
-                    //col = colors[t];
+               // int r = (int)((colors[t]&0xff0000) - ((int)(3*-normals[t]))<<16);
+               // int g = (int)((colors[t]&0x00ff00) - ((int)(3*-normals[t]))<<8);
+                       //int b = (int)((colors[t]&0x0000ff) - ((int)(3*-normals[t])));
+                      // col = (r&0xff)<<16|(g&0xff)<<8|(b&0xff);
+                  //  col = colors[t];
                    // } else
                         if (I32Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || I32Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || I32Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
                        col = 0xffffff;
