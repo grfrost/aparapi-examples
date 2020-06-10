@@ -1,6 +1,6 @@
 package com.aparapi.examples.view;
 
-public class Mat4 {
+public class F32Mat4 {
     static final int SIZE = 16;
     static final int MAX_MAT4 = 100;
     static final int X0Y0 = 0;

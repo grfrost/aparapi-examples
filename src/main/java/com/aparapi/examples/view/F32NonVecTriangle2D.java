@@ -1,6 +1,6 @@
 package com.aparapi.examples.view;
 
-public class NonVecTriangle2D {
+public class F32NonVecTriangle2D {
 
         static final int SIZE = 6;
         static final int X0 = 0;

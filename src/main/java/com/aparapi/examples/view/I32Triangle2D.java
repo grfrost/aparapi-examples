@@ -1,6 +1,6 @@
 package com.aparapi.examples.view;
 
-public class Triangle2D {
+public class I32Triangle2D {
     static final int SIZE = 3;
     static final int V0 = 0;
     static final int V1 = 1;
@@ -16,10 +16,10 @@ public class Triangle2D {
     }
 
     public static float side(int v, int v0, int v1) {
-        v*=Vec2.SIZE;
-        v0*=Vec2.SIZE;
-        v1*=Vec2.SIZE;
-        return (Vec2.entries[v1+Vec2.Y] - Vec2.entries[v0+Vec2.Y] * (Vec2.entries[v+Vec2.X] - Vec2.entries[v0+Vec2.X]) + (-Vec2.entries[v1+Vec2.X] + Vec2.entries[v0+Vec2.X]) * (Vec2.entries[v+Vec2.Y] - Vec2.entries[v0+Vec2.Y]));
+        v*= I32Vec2.SIZE;
+        v0*= I32Vec2.SIZE;
+        v1*= I32Vec2.SIZE;
+        return (I32Vec2.entries[v1+ I32Vec2.Y] - I32Vec2.entries[v0+ I32Vec2.Y] * (I32Vec2.entries[v+ I32Vec2.X] - I32Vec2.entries[v0+ I32Vec2.X]) + (-I32Vec2.entries[v1+ I32Vec2.X] + I32Vec2.entries[v0+ I32Vec2.X]) * (I32Vec2.entries[v+ I32Vec2.Y] - I32Vec2.entries[v0+ I32Vec2.Y]));
     }
 
     public static boolean intriangle(float x, float y, float x0, float y0, float x1, float y1, float x2, float y2) {
@@ -44,14 +44,14 @@ public class Triangle2D {
     }
 
     static int createTriangle(float x0, float y0, float x1, float y1, float x2, float y2, int col, float normal) {
-        entries[count * SIZE + V0] = Vec2.createVec2(x0,y0);
+        entries[count * SIZE + V0] = I32Vec2.createVec2(x0,y0);
         // We need the triangle to be clock wound
         if (side(x0, y0, x1, y1, x2, y2) > 0) {
-            entries[count * SIZE + V1] = Vec2.createVec2(x1,y1);
-            entries[count * SIZE + V2] = Vec2.createVec2(x2,y2);
+            entries[count * SIZE + V1] = I32Vec2.createVec2(x1,y1);
+            entries[count * SIZE + V2] = I32Vec2.createVec2(x2,y2);
         } else {
-            entries[count * SIZE + V1] = Vec2.createVec2(x2,y2);
-            entries[count * SIZE + V2] = Vec2.createVec2(x1,y1);
+            entries[count * SIZE + V1] = I32Vec2.createVec2(x2,y2);
+            entries[count * SIZE + V2] = I32Vec2.createVec2(x1,y1);
         }
         colors[count] = col;
         normals[count] = normal;

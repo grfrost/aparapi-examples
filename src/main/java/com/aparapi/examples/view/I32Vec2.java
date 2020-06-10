@@ -1,6 +1,6 @@
 package com.aparapi.examples.view;
 
-public class Vec2 {
+public class I32Vec2 {
     static final int SIZE = 2;
     static final int MAX = 200;
     static final int X = 0;

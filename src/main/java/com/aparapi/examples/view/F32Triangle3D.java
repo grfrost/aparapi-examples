@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class Triangle3D {
+class F32Triangle3D {
     static final int SIZE = 4;
     static final int MAX = 400;
     static final int V0 = 0;
@@ -35,26 +35,26 @@ class Triangle3D {
 
     static String asString(int i) {
         i *= SIZE;
-        return Vec3.asString(entries[i + V0]) + " -> " + Vec3.asString(entries[i + V1]) + " -> " + Vec3.asString(entries[i + V2]) + " =" + String.format("0x%8x", entries[i + RGB]);
+        return F32Vec3.asString(entries[i + V0]) + " -> " + F32Vec3.asString(entries[i + V1]) + " -> " + F32Vec3.asString(entries[i + V2]) + " =" + String.format("0x%8x", entries[i + RGB]);
     }
 
     static int mulMat4(int i, int m4) {
         i *= SIZE;
-        return createTriangle3D(Vec3.mulMat4(entries[i + V0], m4), Vec3.mulMat4(entries[i + V1], m4), Vec3.mulMat4(entries[i + V2], m4), entries[i + RGB]);
+        return createTriangle3D(F32Vec3.mulMat4(entries[i + V0], m4), F32Vec3.mulMat4(entries[i + V1], m4), F32Vec3.mulMat4(entries[i + V2], m4), entries[i + RGB]);
     }
 
     static int addVec3(int i, int v3) {
         i *= SIZE;
-        return createTriangle3D(Vec3.addVec3(entries[i + V0], v3), Vec3.addVec3(entries[i + V1], v3), Vec3.addVec3(entries[i + V2], v3), entries[i + RGB]);
+        return createTriangle3D(F32Vec3.addVec3(entries[i + V0], v3), F32Vec3.addVec3(entries[i + V1], v3), F32Vec3.addVec3(entries[i + V2], v3), entries[i + RGB]);
     }
 
     static int mulScaler(int i, float s) {
         i *= SIZE;
-        return createTriangle3D(Vec3.mulScaler(entries[i + V0], s), Vec3.mulScaler(entries[i + V1], s), Vec3.mulScaler(entries[i + V2], s), entries[i + RGB]);
+        return createTriangle3D(F32Vec3.mulScaler(entries[i + V0], s), F32Vec3.mulScaler(entries[i + V1], s), F32Vec3.mulScaler(entries[i + V2], s), entries[i + RGB]);
     }
     static int addScaler(int i, float s) {
         i *= SIZE;
-        return createTriangle3D(Vec3.addScaler(entries[i + V0], s), Vec3.addScaler(entries[i + V1], s), Vec3.addScaler(entries[i + V2], s), entries[i + RGB]);
+        return createTriangle3D(F32Vec3.addScaler(entries[i + V0], s), F32Vec3.addScaler(entries[i + V1], s), F32Vec3.addScaler(entries[i + V2], s), entries[i + RGB]);
     }
 
     static int quad(int v0, int v1, int v2, int v3, int col) {
@@ -92,14 +92,14 @@ class Triangle3D {
         float y,
         float z,
         float s){
-        int a = Vec3.createVec3(x-(s*.5f), y-(s*.5f), z-(s*.5f));  //000  000 111 111
-        int b = Vec3.createVec3(x-(s*.5f), y+(s*.5f), z-(s*.5f));  //010  010 101 101
-        int c = Vec3.createVec3(x+(s*.5f), y+(s*.5f), z-(s*.5f));  //110  011 001 100
-        int d = Vec3.createVec3(x+(s*.5f), y-(s*.5f), z-(s*.5f));  //100  001 011 110
-        int e = Vec3.createVec3(x-(s*.5f), y+(s*.5f), z+(s*.5f));  //011  110 100 001
-        int f = Vec3.createVec3(x+(s*.5f), y+(s*.5f), z+(s*.5f));  //111  111 000 000
-        int g = Vec3.createVec3(x+(s*.5f), y-(s*.5f), z+(s*.5f));  //101  101 010 010
-        int h = Vec3.createVec3(x-(s*.5f), y-(s*.5f), z+(s*.5f));  //001  100 110 011
+        int a = F32Vec3.createVec3(x-(s*.5f), y-(s*.5f), z-(s*.5f));  //000  000 111 111
+        int b = F32Vec3.createVec3(x-(s*.5f), y+(s*.5f), z-(s*.5f));  //010  010 101 101
+        int c = F32Vec3.createVec3(x+(s*.5f), y+(s*.5f), z-(s*.5f));  //110  011 001 100
+        int d = F32Vec3.createVec3(x+(s*.5f), y-(s*.5f), z-(s*.5f));  //100  001 011 110
+        int e = F32Vec3.createVec3(x-(s*.5f), y+(s*.5f), z+(s*.5f));  //011  110 100 001
+        int f = F32Vec3.createVec3(x+(s*.5f), y+(s*.5f), z+(s*.5f));  //111  111 000 000
+        int g = F32Vec3.createVec3(x+(s*.5f), y-(s*.5f), z+(s*.5f));  //101  101 010 010
+        int h = F32Vec3.createVec3(x-(s*.5f), y-(s*.5f), z+(s*.5f));  //001  100 110 011
         quad(a, b, c, d, 0xff0000); //front
         quad(b, e, f, c, 0x0000ff); //top
         quad(d, c, f, g, 0xffff00); //right
@@ -121,7 +121,7 @@ class Triangle3D {
             for (String line = reader.readLine(); line != null; line = reader.readLine()){
                 Matcher matcher = vpattern.matcher(line);
                 if (matcher.matches()){
-                    vertices[verticesCount++] = Vec3.createVec3( Float.parseFloat(matcher.group(1)), Float.parseFloat(matcher.group(2)), Float.parseFloat(matcher.group(3)));
+                    vertices[verticesCount++] = F32Vec3.createVec3( Float.parseFloat(matcher.group(1)), Float.parseFloat(matcher.group(2)), Float.parseFloat(matcher.group(3)));
                 }else{
                     matcher = fpattern.matcher(line);
                     if (matcher.matches()){
@@ -155,18 +155,18 @@ http://paulbourke.net/dataformats/obj/
             float z,
             float s){
 
-        int v1 = Vec3.createVec3(x-(s*.30631559f), y-(s*.20791225f), z+(s*.12760004f));
-        int v2 = Vec3.createVec3(x-(s*.12671047f), y-(s*.20791227f), z+(s*.30720518f));
-        int v3 =Vec3.createVec3( x-(s*.12671045f), y-(s*.38751736f), z+(s*.12760002f));
-        int v4 = Vec3.createVec3(x-(s*.30631556f), y-(s*.20791227f) ,z+(s*.48681026f));
-        int v5 = Vec3.createVec3(x-(s*.48592068f), y-(s*.20791225f), z+(s*.30720514f));
-        int v6 = Vec3.createVec3(x-(s*.30631556f) ,y-(s*.56712254f) ,z+(s*.48681026f));
-        int v7 = Vec3.createVec3(x-(s*.12671047f), y-(s*.56712254f) ,z+(s*.30720512f));
-        int v8 = Vec3.createVec3(x-(s*.12671042f), y-(s*.3875174f) ,z+(s*.48681026f));
-        int v9 = Vec3.createVec3(x-(s*.48592068f), y-(s*.38751736f), z+(s*.1276f));
-        int v10 = Vec3.createVec3(x -(s*.30631556f),y -(s*.56712254f) ,z+(s*.1276f));
-        int v11 = Vec3.createVec3(x-(s*.48592068f) ,y-(s*.56712254f), z+(s*.30720512f));
-        int v12= Vec3.createVec3( x-(s*.48592068f), y-(s*.38751743f) ,z+(s*.4868103f));
+        int v1 = F32Vec3.createVec3(x-(s*.30631559f), y-(s*.20791225f), z+(s*.12760004f));
+        int v2 = F32Vec3.createVec3(x-(s*.12671047f), y-(s*.20791227f), z+(s*.30720518f));
+        int v3 = F32Vec3.createVec3( x-(s*.12671045f), y-(s*.38751736f), z+(s*.12760002f));
+        int v4 = F32Vec3.createVec3(x-(s*.30631556f), y-(s*.20791227f) ,z+(s*.48681026f));
+        int v5 = F32Vec3.createVec3(x-(s*.48592068f), y-(s*.20791225f), z+(s*.30720514f));
+        int v6 = F32Vec3.createVec3(x-(s*.30631556f) ,y-(s*.56712254f) ,z+(s*.48681026f));
+        int v7 = F32Vec3.createVec3(x-(s*.12671047f), y-(s*.56712254f) ,z+(s*.30720512f));
+        int v8 = F32Vec3.createVec3(x-(s*.12671042f), y-(s*.3875174f) ,z+(s*.48681026f));
+        int v9 = F32Vec3.createVec3(x-(s*.48592068f), y-(s*.38751736f), z+(s*.1276f));
+        int v10 = F32Vec3.createVec3(x -(s*.30631556f),y -(s*.56712254f) ,z+(s*.1276f));
+        int v11 = F32Vec3.createVec3(x-(s*.48592068f) ,y-(s*.56712254f), z+(s*.30720512f));
+        int v12= F32Vec3.createVec3( x-(s*.48592068f), y-(s*.38751743f) ,z+(s*.4868103f));
 
 
 
@@ -197,35 +197,35 @@ http://paulbourke.net/dataformats/obj/
 
     public static int getV0(int i) {
         i *= SIZE;
-        return Triangle3D.entries[i + Triangle3D.V0];
+        return F32Triangle3D.entries[i + F32Triangle3D.V0];
     }
 
     public static int getV1(int i) {
         i *= SIZE;
-        return Triangle3D.entries[i + Triangle3D.V1];
+        return F32Triangle3D.entries[i + F32Triangle3D.V1];
     }
 
     public static int getV2(int i) {
         i *= SIZE;
-        return Triangle3D.entries[i + Triangle3D.V2];
+        return F32Triangle3D.entries[i + F32Triangle3D.V2];
     }
 
     public static int getRGB(int i) {
         i *= SIZE;
-        return Triangle3D.entries[i + Triangle3D.RGB];
+        return F32Triangle3D.entries[i + F32Triangle3D.RGB];
     }
 
 
     public static int createTriangle2D(int i, int rgb, float normal) {
-        int v0 = Triangle3D.getV0(i);
-        int v1 = Triangle3D.getV1(i);
-        int v2 = Triangle3D.getV2(i);
-        return Triangle2D.createTriangle(Vec3.getX(v0), Vec3.getY(v0), Vec3.getX(v1), Vec3.getY(v1), Vec3.getX(v2), Vec3.getY(v2), rgb, normal);
+        int v0 = F32Triangle3D.getV0(i);
+        int v1 = F32Triangle3D.getV1(i);
+        int v2 = F32Triangle3D.getV2(i);
+        return I32Triangle2D.createTriangle(F32Vec3.getX(v0), F32Vec3.getY(v0), F32Vec3.getX(v1), F32Vec3.getY(v1), F32Vec3.getX(v2), F32Vec3.getY(v2), rgb, normal);
     }
     public static int createNonVecTriangle2D(int i, int rgb) {
-        int v0 = Triangle3D.getV0(i);
-        int v1 = Triangle3D.getV1(i);
-        int v2 = Triangle3D.getV2(i);
-        return NonVecTriangle2D.createTriangle(Vec3.getX(v0), Vec3.getY(v0), Vec3.getX(v1), Vec3.getY(v1), Vec3.getX(v2), Vec3.getY(v2), rgb);
+        int v0 = F32Triangle3D.getV0(i);
+        int v1 = F32Triangle3D.getV1(i);
+        int v2 = F32Triangle3D.getV2(i);
+        return F32NonVecTriangle2D.createTriangle(F32Vec3.getX(v0), F32Vec3.getY(v0), F32Vec3.getX(v1), F32Vec3.getY(v1), F32Vec3.getX(v2), F32Vec3.getY(v2), rgb);
     }
 }

@@ -11,7 +11,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.io.File;
 import javax.swing.*;
 
 public class Main {
@@ -91,20 +90,20 @@ public class Main {
                     }
                 }
             }
-          //  Triangle3D.cubeoctahedron(0, 0, 0, 2);
-             Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
+            F32Triangle3D.cubeoctahedron(0, 0, 0, 2);
+          //   Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
 
-            cameraVec3 = Vec3.createVec3(0, 0, 0);
-            lookDirVec3 = Vec3.createVec3(0, 0, 0);
-            projectionMat4 = Mat4.createProjectionMatrix(view.image.getWidth(), view.image.getHeight(), 0.1f, 5f, 90f);
-            centerVec3 = Vec3.createVec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
-            moveAwayVec3 = Vec3.createVec3(0, 0, 6);
+            cameraVec3 = F32Vec3.createVec3(0, 0, 0);
+            lookDirVec3 = F32Vec3.createVec3(0, 0, 0);
+            projectionMat4 = F32Mat4.createProjectionMatrix(view.image.getWidth(), view.image.getHeight(), 0.1f, 5f, 90f);
+            centerVec3 = F32Vec3.createVec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
+            moveAwayVec3 = F32Vec3.createVec3(0, 0, 6);
 
-            markedTriangles3D = Triangle3D.count;
-            markedTriangles2D = Triangle2D.count;
-            markedVec3 = Vec3.count;
-            markedMat4 = Mat4.count;
-            markedVec2 = Vec2.count;
+            markedTriangles3D = F32Triangle3D.count;
+            markedTriangles2D = I32Triangle2D.count;
+            markedVec3 = F32Vec3.count;
+            markedMat4 = F32Mat4.count;
+            markedVec2 = I32Vec2.count;
         }
 
         Point waitForPoint(long timeout) {
@@ -138,64 +137,64 @@ public class Main {
               //  System.out.println("Frames " + frames + " Theta = " + theta + " FPS = " + ((frames * 1000) / elapsedMillis));
             }
 
-            Vec3.count = markedVec3;
-            Vec2.count = markedVec2;
-            Triangle3D.count = markedTriangles3D;
-            Triangle2D.count = markedTriangles2D;
-            Mat4.count = markedMat4;
+            F32Vec3.count = markedVec3;
+            I32Vec2.count = markedVec2;
+            F32Triangle3D.count = markedTriangles3D;
+            I32Triangle2D.count = markedTriangles2D;
+            F32Mat4.count = markedMat4;
 
-            int rotXMat4 = Mat4.createRotXMat4(theta * 2);
-            int rotYMat4 = Mat4.createRotYMat4(theta / 2);
-            int rotZMat4 = Mat4.createRotZMat4(theta);
-            int rotXYMat4 = Mat4.mulMat4(rotXMat4, rotYMat4);
-            int rotXYZMat4 = Mat4.mulMat4(rotXYMat4, rotZMat4);
+            int rotXMat4 = F32Mat4.createRotXMat4(theta * 2);
+            int rotYMat4 = F32Mat4.createRotYMat4(theta / 2);
+            int rotZMat4 = F32Mat4.createRotZMat4(theta);
+            int rotXYMat4 = F32Mat4.mulMat4(rotXMat4, rotYMat4);
+            int rotXYZMat4 = F32Mat4.mulMat4(rotXYMat4, rotZMat4);
 
-            int resetVec3 = Vec3.count;
-            int resetTriangle3 = Triangle3D.count;
-            int resetMat4 = Mat4.count;
+            int resetVec3 = F32Vec3.count;
+            int resetTriangle3 = F32Triangle3D.count;
+            int resetMat4 = F32Mat4.count;
 
-            Triangle2D.count = 0;
+            I32Triangle2D.count = 0;
          //   NonVecTriangle2D.count = 0;
-            for (int t = 0; t < Triangle3D.count; t++) {
-                int rotatedTri = Triangle3D.mulMat4(t, rotXYZMat4);
-                int translatedTri = Triangle3D.addVec3(rotatedTri, moveAwayVec3);
-                int v0 = Triangle3D.getV0(translatedTri);
-                int v1 = Triangle3D.getV1(translatedTri);
-                int v2 = Triangle3D.getV2(translatedTri);
+            for (int t = 0; t < F32Triangle3D.count; t++) {
+                int rotatedTri = F32Triangle3D.mulMat4(t, rotXYZMat4);
+                int translatedTri = F32Triangle3D.addVec3(rotatedTri, moveAwayVec3);
+                int v0 = F32Triangle3D.getV0(translatedTri);
+                int v1 = F32Triangle3D.getV1(translatedTri);
+                int v2 = F32Triangle3D.getV2(translatedTri);
 
-                int line1Vec3 = Vec3.subVec3(v1, v0);
-                int line2Vec3 = Vec3.subVec3(v2, v0);
-                int normalVec3 = Vec3.dotProd(line1Vec3, line2Vec3);
+                int line1Vec3 = F32Vec3.subVec3(v1, v0);
+                int line2Vec3 = F32Vec3.subVec3(v2, v0);
+                int normalVec3 = F32Vec3.dotProd(line1Vec3, line2Vec3);
 
-                float sumOfSquares = Vec3.sumOfSquares(normalVec3);
+                float sumOfSquares = F32Vec3.sumOfSquares(normalVec3);
 
-                int rgb = Triangle3D.getRGB(translatedTri);
+                int rgb = F32Triangle3D.getRGB(translatedTri);
 
                 if (sumOfSquares != 0) {
-                    normalVec3 = Vec3.divScaler(normalVec3, sumOfSquares);
-                    int v0Minuscamera = Vec3.subVec3(v0, cameraVec3);
-                    int play = Vec3.mulVec3(v0Minuscamera, normalVec3);
-                    float sumOfPLay = Vec3.sumOf(play);
+                    normalVec3 = F32Vec3.divScaler(normalVec3, sumOfSquares);
+                    int v0Minuscamera = F32Vec3.subVec3(v0, cameraVec3);
+                    int play = F32Vec3.mulVec3(v0Minuscamera, normalVec3);
+                    float sumOfPLay = F32Vec3.sumOf(play);
                     if (sumOfPLay <= 0.0) {
-                        int projected = Triangle3D.mulMat4(translatedTri, projectionMat4);
-                        int centered = Triangle3D.mulScaler(projected, view.image.getHeight() / 4);
-                        centered = Triangle3D.addScaler(centered, view.image.getHeight() / 2);
-                        Triangle3D.createTriangle2D(centered, rgb, sumOfPLay);
+                        int projected = F32Triangle3D.mulMat4(translatedTri, projectionMat4);
+                        int centered = F32Triangle3D.mulScaler(projected, view.image.getHeight() / 4);
+                        centered = F32Triangle3D.addScaler(centered, view.image.getHeight() / 2);
+                        F32Triangle3D.createTriangle2D(centered, rgb, sumOfPLay);
                        // System.out.println("sum of play " +sumOfPLay);
                      //   Triangle3D.createNonVecTriangle2D(centered, rgb);
                     }
                 }
 
-                Vec3.count = resetVec3;
-                Triangle3D.count = resetTriangle3;
-                Mat4.count = resetMat4;
+                F32Vec3.count = resetVec3;
+                F32Triangle3D.count = resetTriangle3;
+                F32Mat4.count = resetMat4;
             }
-            kernel.triangle2DEntries = Triangle2D.entries;
-            kernel.triangle2DEntriesCount = Triangle2D.count;
-            kernel.vec2Entries = Vec2.entries;
-            kernel.vec2EntriesCount = Vec2.count;
-            kernel.colors = Triangle2D.colors;
-            kernel.normals =Triangle2D.normals;
+            kernel.triangle2DEntries = I32Triangle2D.entries;
+            kernel.triangle2DEntriesCount = I32Triangle2D.count;
+            kernel.vec2Entries = I32Vec2.entries;
+            kernel.vec2EntriesCount = I32Vec2.count;
+            kernel.colors = I32Triangle2D.colors;
+            kernel.normals = I32Triangle2D.normals;
          //   kernel.triangles = NonVecTriangle2D.entries;
           //  kernel.triangleCount = NonVecTriangle2D.count;
             kernel.execute(kernel.range);
@@ -264,21 +263,21 @@ public class Main {
             float y = gid / width;
             int col = 0x00000;
             for (int t = 0; t < triangle2DEntriesCount; t++) {
-                int v0 = triangle2DEntries[Triangle2D.SIZE * t + Triangle2D.V0];
-                int v1 = triangle2DEntries[Triangle2D.SIZE * t + Triangle2D.V1];
-                int v2 = triangle2DEntries[Triangle2D.SIZE * t + Triangle2D.V2];
-                float x0 = vec2Entries[v0 * Vec2.SIZE + Vec2.X];
-                float y0 = vec2Entries[v0 * Vec2.SIZE + Vec2.Y];
-                float x1 = vec2Entries[v1 * Vec2.SIZE + Vec2.X];
-                float y1 = vec2Entries[v1 * Vec2.SIZE + Vec2.Y];
-                float x2 = vec2Entries[v2 * Vec2.SIZE + Vec2.X];
-                float y2 = vec2Entries[v2 * Vec2.SIZE + Vec2.Y];
-                if (Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
+                int v0 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V0];
+                int v1 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V1];
+                int v2 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V2];
+                float x0 = vec2Entries[v0 * I32Vec2.SIZE + I32Vec2.X];
+                float y0 = vec2Entries[v0 * I32Vec2.SIZE + I32Vec2.Y];
+                float x1 = vec2Entries[v1 * I32Vec2.SIZE + I32Vec2.X];
+                float y1 = vec2Entries[v1 * I32Vec2.SIZE + I32Vec2.Y];
+                float x2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.X];
+                float y2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.Y];
+                if (I32Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
                        int r = (int)(0xff0000 - (3*-normals[t]));
                     int g = (int)(0x00ff00 - (3*-normals[t]));
                        int b = (int)(0x0000ff - (3*-normals[t]));
                        col = (r&0xff)<<16|(g&0xff)<<8|(b&0xff);
-                    } else if (Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
+                    } else if (I32Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || I32Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || I32Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
                        col = 0x000000;
                 }
             }

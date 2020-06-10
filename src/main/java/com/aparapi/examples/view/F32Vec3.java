@@ -1,6 +1,6 @@
 package com.aparapi.examples.view;
 
-public class Vec3 {
+public class F32Vec3 {
     static final int SIZE = 3;
     static final int MAX = 400;
     static final int X = 0;
@@ -22,16 +22,16 @@ public class Vec3 {
     // we normalize the result
     static int mulMat4(int i, int m4) {
         i *= SIZE;
-        m4 *= Mat4.SIZE;
+        m4 *= F32Mat4.SIZE;
         int o = createVec3(
-                entries[i + X] * Mat4.entries[m4 + Mat4.X0Y0] + entries[i + Y] * Mat4.entries[m4 + Mat4.X0Y1] + entries[i + Z] * Mat4.entries[m4 + Mat4.X0Y2] + 1f * Mat4.entries[m4 + Mat4.X0Y3],
-                entries[i + X] * Mat4.entries[m4 + Mat4.X1Y0] + entries[i + Y] * Mat4.entries[m4 + Mat4.X1Y1] + entries[i + Z] * Mat4.entries[m4 + Mat4.X1Y2] + 1f * Mat4.entries[m4 + Mat4.X1Y3],
-                entries[i + X] * Mat4.entries[m4 + Mat4.X2Y0] + entries[i + Y] * Mat4.entries[m4 + Mat4.X2Y1] + entries[i + Z] * Mat4.entries[m4 + Mat4.X2Y2] + 1f * Mat4.entries[m4 + Mat4.X2Y3]
+                entries[i + X] * F32Mat4.entries[m4 + F32Mat4.X0Y0] + entries[i + Y] * F32Mat4.entries[m4 + F32Mat4.X0Y1] + entries[i + Z] * F32Mat4.entries[m4 + F32Mat4.X0Y2] + 1f * F32Mat4.entries[m4 + F32Mat4.X0Y3],
+                entries[i + X] * F32Mat4.entries[m4 + F32Mat4.X1Y0] + entries[i + Y] * F32Mat4.entries[m4 + F32Mat4.X1Y1] + entries[i + Z] * F32Mat4.entries[m4 + F32Mat4.X1Y2] + 1f * F32Mat4.entries[m4 + F32Mat4.X1Y3],
+                entries[i + X] * F32Mat4.entries[m4 + F32Mat4.X2Y0] + entries[i + Y] * F32Mat4.entries[m4 + F32Mat4.X2Y1] + entries[i + Z] * F32Mat4.entries[m4 + F32Mat4.X2Y2] + 1f * F32Mat4.entries[m4 + F32Mat4.X2Y3]
         );
 
-        float w = entries[i + X] * Mat4.entries[m4 + Mat4.X3Y0] + entries[i + Y] * Mat4.entries[m4 + Mat4.X3Y1] + entries[i + Z] * Mat4.entries[m4 + Mat4.X3Y2] + 1 * Mat4.entries[m4 + Mat4.X3Y3];
+        float w = entries[i + X] * F32Mat4.entries[m4 + F32Mat4.X3Y0] + entries[i + Y] * F32Mat4.entries[m4 + F32Mat4.X3Y1] + entries[i + Z] * F32Mat4.entries[m4 + F32Mat4.X3Y2] + 1 * F32Mat4.entries[m4 + F32Mat4.X3Y3];
         if (w != 0.0) {
-            o = Vec3.divScaler(o, w);
+            o = F32Vec3.divScaler(o, w);
         }
         return o;
     }
