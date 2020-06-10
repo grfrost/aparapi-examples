@@ -7,26 +7,26 @@ public class I32Vec2 {
     static final int Y = 1;
 
     static int count = 0;
-    static float entries[] = new float[MAX * SIZE];
+    static int entries[] = new int[MAX * SIZE];
 
-    static int createVec2(float x, float y) {
+    static int createVec2(int x, int y) {
         entries[count * SIZE + X] = x;
         entries[count * SIZE + Y] = y;
         return count++;
     }
 
 
-    static int mulScaler(int i, float s) {
+    static int mulScaler(int i, int s) {
         i *= SIZE;
         return createVec2(entries[i + X] * s, entries[i + Y] * s);
     }
 
-    static int addScaler(int i, float s) {
+    static int addScaler(int i, int s) {
         i *= SIZE;
         return createVec2(entries[i + X] + s, entries[i + Y] + s);
     }
 
-    static int divScaler(int i, float s) {
+    static int divScaler(int i, int s) {
         i *= SIZE;
         return createVec2(entries[i + X] / s, entries[i + Y] / s);
     }

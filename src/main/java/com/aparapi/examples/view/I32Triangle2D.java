@@ -11,7 +11,7 @@ public class I32Triangle2D {
     public static int[] entries = new int[MAX * SIZE];
     public static int[] colors = new int[MAX];
     public static float[] normals = new float[MAX];
-    public static float side(float x, float y, float x0, float y0, float x1, float y1) {
+    public static float side(int x, int y, int x0, int y0, int x1, int y1) {
         return (y1 - y0) * (x - x0) + (-x1 + x0) * (y - y0);
     }
 
@@ -22,7 +22,7 @@ public class I32Triangle2D {
         return (I32Vec2.entries[v1+ I32Vec2.Y] - I32Vec2.entries[v0+ I32Vec2.Y] * (I32Vec2.entries[v+ I32Vec2.X] - I32Vec2.entries[v0+ I32Vec2.X]) + (-I32Vec2.entries[v1+ I32Vec2.X] + I32Vec2.entries[v0+ I32Vec2.X]) * (I32Vec2.entries[v+ I32Vec2.Y] - I32Vec2.entries[v0+ I32Vec2.Y]));
     }
 
-    public static boolean intriangle(float x, float y, float x0, float y0, float x1, float y1, float x2, float y2) {
+    public static boolean intriangle(int x, int y, int x0, int y0, int x1, int y1, int x2, int y2) {
         return side(x, y, x0, y0, x1, y1) >= 0 && side(x, y, x1, y1, x2, y2) >= 0 && side(x, y, x2, y2, x0, y0) >= 0;
     }
     public static boolean intriangle(int v, int v0, int v1, int v2){
@@ -43,7 +43,7 @@ public class I32Triangle2D {
         }
     }
 
-    static int createTriangle(float x0, float y0, float x1, float y1, float x2, float y2, int col, float normal) {
+    static int createTriangle(int x0, int y0, int x1, int y1, int x2, int y2, int col, float normal) {
         entries[count * SIZE + V0] = I32Vec2.createVec2(x0,y0);
         // We need the triangle to be clock wound
         if (side(x0, y0, x1, y1, x2, y2) > 0) {
@@ -54,7 +54,7 @@ public class I32Triangle2D {
             entries[count * SIZE + V2] = I32Vec2.createVec2(x1,y1);
         }
         colors[count] = col;
-        normals[count] = normal;
+        normals[count]=normal;
         return count++;
     }
 
@@ -69,7 +69,6 @@ public class I32Triangle2D {
             entries[count * SIZE + V2] = v1;
         }
         colors[count] = col;
-        normals[count] = normal;
         return count++;
     }
 }

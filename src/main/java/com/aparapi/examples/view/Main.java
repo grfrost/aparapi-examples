@@ -45,12 +45,32 @@ public class Main {
         int projectionMat4;
         int centerVec3;
         int moveAwayVec3;
-        int markedTriangles3D;
-        int markedTriangles2D;
-        int markedVec2;
-        int markedVec3;
-        int markedMat4;
+        static class Mark{
+           int markedTriangles3D;
+           int markedTriangles2D;
+           int markedVec2;
+           int markedVec3;
+           int markedMat4;
+           Mark(){
+               markedTriangles3D = F32Triangle3D.count;
+               markedVec3 = F32Vec3.count;
+               markedMat4 = F32Mat4.count;
+               markedTriangles2D = I32Triangle2D.count;
+               markedVec2 = I32Vec2.count;
+           }
+           void resetAll(){
+               reset3D();
+               I32Triangle2D.count =markedTriangles2D;
+               I32Vec2.count =markedVec2 ;
+           }
+            void reset3D(){
+                F32Triangle3D.count  =markedTriangles3D ;
+                F32Vec3.count = markedVec3 ;
+                F32Mat4.count =markedMat4;
+            }
 
+        }
+        Mark mark ;
         ViewFrame(String name, RasterKernel kernel) {
             super(name);
             startMillis = System.currentTimeMillis();
@@ -98,12 +118,8 @@ public class Main {
             projectionMat4 = F32Mat4.createProjectionMatrix(view.image.getWidth(), view.image.getHeight(), 0.1f, 5f, 90f);
             centerVec3 = F32Vec3.createVec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
             moveAwayVec3 = F32Vec3.createVec3(0, 0, 6);
+            mark = new Mark();
 
-            markedTriangles3D = F32Triangle3D.count;
-            markedTriangles2D = I32Triangle2D.count;
-            markedVec3 = F32Vec3.count;
-            markedMat4 = F32Mat4.count;
-            markedVec2 = I32Vec2.count;
         }
 
         Point waitForPoint(long timeout) {
@@ -134,14 +150,10 @@ public class Main {
             float theta = elapsedMillis * .001f;
 
             if ((frames++ % 50) == 0) {
-              //  System.out.println("Frames " + frames + " Theta = " + theta + " FPS = " + ((frames * 1000) / elapsedMillis));
+                System.out.println("Frames " + frames + " Theta = " + theta + " FPS = " + ((frames * 1000) / elapsedMillis));
             }
 
-            F32Vec3.count = markedVec3;
-            I32Vec2.count = markedVec2;
-            F32Triangle3D.count = markedTriangles3D;
-            I32Triangle2D.count = markedTriangles2D;
-            F32Mat4.count = markedMat4;
+            mark.resetAll();
 
             int rotXMat4 = F32Mat4.createRotXMat4(theta * 2);
             int rotYMat4 = F32Mat4.createRotYMat4(theta / 2);
@@ -149,12 +161,10 @@ public class Main {
             int rotXYMat4 = F32Mat4.mulMat4(rotXMat4, rotYMat4);
             int rotXYZMat4 = F32Mat4.mulMat4(rotXYMat4, rotZMat4);
 
-            int resetVec3 = F32Vec3.count;
-            int resetTriangle3 = F32Triangle3D.count;
-            int resetMat4 = F32Mat4.count;
+            Mark resetMark = new Mark();
+
 
             I32Triangle2D.count = 0;
-         //   NonVecTriangle2D.count = 0;
             for (int t = 0; t < F32Triangle3D.count; t++) {
                 int rotatedTri = F32Triangle3D.mulMat4(t, rotXYZMat4);
                 int translatedTri = F32Triangle3D.addVec3(rotatedTri, moveAwayVec3);
@@ -179,24 +189,17 @@ public class Main {
                         int projected = F32Triangle3D.mulMat4(translatedTri, projectionMat4);
                         int centered = F32Triangle3D.mulScaler(projected, view.image.getHeight() / 4);
                         centered = F32Triangle3D.addScaler(centered, view.image.getHeight() / 2);
-                        F32Triangle3D.createTriangle2D(centered, rgb, sumOfPLay);
-                       // System.out.println("sum of play " +sumOfPLay);
-                     //   Triangle3D.createNonVecTriangle2D(centered, rgb);
+                        F32Triangle3D.createI32Triangle2D(centered, rgb, sumOfPLay);
                     }
                 }
-
-                F32Vec3.count = resetVec3;
-                F32Triangle3D.count = resetTriangle3;
-                F32Mat4.count = resetMat4;
+               resetMark.reset3D();
             }
             kernel.triangle2DEntries = I32Triangle2D.entries;
             kernel.triangle2DEntriesCount = I32Triangle2D.count;
             kernel.vec2Entries = I32Vec2.entries;
             kernel.vec2EntriesCount = I32Vec2.count;
             kernel.colors = I32Triangle2D.colors;
-            kernel.normals = I32Triangle2D.normals;
-         //   kernel.triangles = NonVecTriangle2D.entries;
-          //  kernel.triangleCount = NonVecTriangle2D.count;
+            kernel.normals =I32Triangle2D.normals;
             kernel.execute(kernel.range);
             view.update();
             viewer.repaint();
@@ -212,12 +215,10 @@ public class Main {
         Range range;
         int triangle2DEntries[];
         int triangle2DEntriesCount;
-        float vec2Entries[];
+        int vec2Entries[];
         int vec2EntriesCount;
         int colors[];
         float normals[];
-        int triangleCount;
-        float[] triangles;
 
 
         public RasterKernel(View view) {
@@ -233,52 +234,32 @@ public class Main {
             height = _height;
             rgb = _rgb;
         }
-/*
-        public void nonvecrun() {
-            final int gid = getGlobalId();
-            float x = gid % width;
-            float y = gid / width;
-            int col = 0x00000;
-            for (int t = 0; t < triangleCount; t++) {
-                float x0 = triangles[NonVecTriangle2D.X0 + t * NonVecTriangle2D.SIZE];
-                float y0 = triangles[NonVecTriangle2D.Y0 + t * NonVecTriangle2D.SIZE];
-                float x1 = triangles[NonVecTriangle2D.X1 + t * NonVecTriangle2D.SIZE];
-                float y1 = triangles[NonVecTriangle2D.Y1 + t * NonVecTriangle2D.SIZE];
-                float x2 = triangles[NonVecTriangle2D.X2 + t * NonVecTriangle2D.SIZE];
-                float y2 = triangles[NonVecTriangle2D.Y2 + t * NonVecTriangle2D.SIZE];
-                if (NonVecTriangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
-                    col = colors[t];
-                } else
-                  if (NonVecTriangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || NonVecTriangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || NonVecTriangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
-                    col = 0xFF0000;
-                }
-            }
-            rgb[gid] = col;
-        }
-*/
+
 
         public void run() {
             final int gid = getGlobalId();
-            float x = gid % width;
-            float y = gid / width;
+            int x = gid % width;
+            int y = gid / width;
             int col = 0x00000;
             for (int t = 0; t < triangle2DEntriesCount; t++) {
                 int v0 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V0];
                 int v1 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V1];
                 int v2 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V2];
-                float x0 = vec2Entries[v0 * I32Vec2.SIZE + I32Vec2.X];
-                float y0 = vec2Entries[v0 * I32Vec2.SIZE + I32Vec2.Y];
-                float x1 = vec2Entries[v1 * I32Vec2.SIZE + I32Vec2.X];
-                float y1 = vec2Entries[v1 * I32Vec2.SIZE + I32Vec2.Y];
-                float x2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.X];
-                float y2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.Y];
-                if (I32Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
-                       int r = (int)(0xff0000 - (3*-normals[t]));
-                    int g = (int)(0x00ff00 - (3*-normals[t]));
-                       int b = (int)(0x0000ff - (3*-normals[t]));
-                       col = (r&0xff)<<16|(g&0xff)<<8|(b&0xff);
-                    } else if (I32Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || I32Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || I32Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
-                       col = 0x000000;
+                int x0 = vec2Entries[v0 * I32Vec2.SIZE + I32Vec2.X];
+                int y0 = vec2Entries[v0 * I32Vec2.SIZE + I32Vec2.Y];
+                int x1 = vec2Entries[v1 * I32Vec2.SIZE + I32Vec2.X];
+                int y1 = vec2Entries[v1 * I32Vec2.SIZE + I32Vec2.Y];
+                int x2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.X];
+                int y2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.Y];
+             //   if (I32Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
+                 //      int r = (int)(0xff0000 - (3*-normals[t]));
+                  //  int g = (int)(0x00ff00 - (3*-normals[t]));
+                   //    int b = (int)(0x0000ff - (3*-normals[t]));
+                    //   col = (r&0xff)<<16|(g&0xff)<<8|(b&0xff);
+                    //col = colors[t];
+                   // } else
+                        if (I32Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || I32Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || I32Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
+                       col = 0xffffff;
                 }
             }
 

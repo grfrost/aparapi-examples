@@ -216,16 +216,12 @@ http://paulbourke.net/dataformats/obj/
     }
 
 
-    public static int createTriangle2D(int i, int rgb, float normal) {
+    public static int createI32Triangle2D(int i, int rgb, float normal) {
         int v0 = F32Triangle3D.getV0(i);
         int v1 = F32Triangle3D.getV1(i);
         int v2 = F32Triangle3D.getV2(i);
-        return I32Triangle2D.createTriangle(F32Vec3.getX(v0), F32Vec3.getY(v0), F32Vec3.getX(v1), F32Vec3.getY(v1), F32Vec3.getX(v2), F32Vec3.getY(v2), rgb, normal);
+        return I32Triangle2D.createTriangle((int)F32Vec3.getX(v0), (int)F32Vec3.getY(v0), (int)F32Vec3.getX(v1),
+                (int)F32Vec3.getY(v1), (int)F32Vec3.getX(v2), (int)F32Vec3.getY(v2), rgb, normal);
     }
-    public static int createNonVecTriangle2D(int i, int rgb) {
-        int v0 = F32Triangle3D.getV0(i);
-        int v1 = F32Triangle3D.getV1(i);
-        int v2 = F32Triangle3D.getV2(i);
-        return F32NonVecTriangle2D.createTriangle(F32Vec3.getX(v0), F32Vec3.getY(v0), F32Vec3.getX(v1), F32Vec3.getY(v1), F32Vec3.getX(v2), F32Vec3.getY(v2), rgb);
-    }
+   
 }
