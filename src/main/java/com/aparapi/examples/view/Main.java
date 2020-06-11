@@ -18,13 +18,13 @@ import javax.swing.*;
 
 public class Main {
     public static class Config{
-        enum ColourMode {NORMALIZED_COLOUR, COLOUR, NORMALIZED_WHITE, WHITE};
+        enum ColourMode {NORMALIZED_COLOUR, NORMALIZED_INV_COLOUR, COLOUR, NORMALIZED_WHITE, NORMALIZED_INV_WHITE, WHITE};
         enum DisplayMode {FILL, WIRE, WIRE_SHOW_HIDDEN, WIRE_AND_FILL};
 
-        public static final ColourMode colourMode = ColourMode.COLOUR.NORMALIZED_WHITE;
+        public static final ColourMode colourMode = ColourMode.COLOUR.NORMALIZED_INV_WHITE;
         public static final DisplayMode displayMode = DisplayMode.FILL;
         public static final float deltaSquare = 10000f;
-        public static final String eliteAsset = "CONSTRICTOR";//COBRAMK1";
+        public static final String eliteAsset = "CONSTRICTOR";// null;//"COBRA";//"CONSTRICTOR";//COBRAMK1";
         public static final float thetaDelta = 0.001f;
 
 
@@ -128,8 +128,11 @@ public class Main {
 
             //F32Triangle3D.rubric(.49f);
            // F32Triangle3D.cubeoctahedron(0, 0, 0, 4);
-            Elite.load(Config.eliteAsset);
-            // F32Triangle3D.cube(1, 1, 1, .4f);
+            if (Config.eliteAsset != null) {
+                Elite.load(Config.eliteAsset);
+            }else {
+                F32Triangle3D.cube(0, 0, 0, 2f);
+            }
             //   Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
 
             cameraVec3 = F32Vec3.createVec3(0, 0, 0);
@@ -193,7 +196,7 @@ public class Main {
                 y2 = (int) F32Vec3.getY(v2);
                 z2 = F32Vec3.getZ(v2);
                 this.rgb = rgb;
-                this.howVisible = Math.abs(howVisible);
+                this.howVisible = howVisible;
                 z = Math.min(z0, Math.min(z1, z2));
             }
 
@@ -208,8 +211,14 @@ public class Main {
                     r = r - (int) (20 * howVisible);
                     g = g - (int) (20 * howVisible);
                     b = b - (int) (20 * howVisible);
+                }else   if (Config.colourMode == Config.ColourMode.NORMALIZED_INV_COLOUR) {
+                        r = r + (int) (20 * howVisible);
+                        g = g + (int) (20 * howVisible);
+                        b = b + (int) (20 * howVisible);
                 } else if (Config.colourMode == Config.ColourMode.NORMALIZED_WHITE) {
-                    r = g = b = (int) (0xff + (3 * howVisible));
+                    r = g = b = (int) (0x7f - (20 * howVisible));
+                } else if (Config.colourMode == Config.ColourMode.NORMALIZED_INV_WHITE) {
+                    r = g = b = (int) (0x7f + (20 * howVisible));
                 } else if (Config.colourMode == Config.ColourMode.WHITE) {
                     r = g = b = 0xff;
                 }
