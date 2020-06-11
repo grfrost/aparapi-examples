@@ -272,4 +272,14 @@ http://paulbourke.net/dataformats/obj/
         int normalVec3 = normal(i);
         return F32Vec3.divScaler(normalVec3,  F32Vec3.sumOfSquares(normalVec3));
     }
+
+    public static void rubric(float s) {
+        for (int x = -1; x < 2; x++) {
+            for (int y = -1; y < 2; y++) {
+                for (int z = -1; z < 2; z++) {
+                    F32Triangle3D.cube(x * .5f, y * .5f, z * .5f, s);
+                }
+            }
+        }
+    }
 }

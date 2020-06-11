@@ -4,10 +4,7 @@ package com.aparapi.examples.view;
 
 import com.aparapi.Kernel;
 import com.aparapi.Range;
-import java.awt.Graphics2D;
-import java.awt.Graphics;
-import java.awt.Dimension;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -17,8 +14,7 @@ import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.JFrame;
-import javax.swing.JComponent;
+import javax.swing.*;
 
 public class Main {
     public static class View {
@@ -116,17 +112,11 @@ public class Main {
                 }
             });
 
-            for (int x = -1; x < 2; x++) {
-                for (int y = -1; y < 2; y++) {
-                    for (int z = -1; z < 2; z++) {
-                         F32Triangle3D.cube(x * .5f, y * .5f, z * .5f, .47f);
-                    }
-                }
-            }
-            F32Triangle3D.cubeoctahedron(0, 0, 0, 4);
-         //    Elite.load("WORM");
 
-           // F32Triangle3D.cube(1, 1, 1, .4f);
+            F32Triangle3D.rubric(.49f);
+            F32Triangle3D.cubeoctahedron(0, 0, 0, 4);
+            // Elite.load("WORM");
+            // F32Triangle3D.cube(1, 1, 1, .4f);
             //   Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
 
             cameraVec3 = F32Vec3.createVec3(0, 0, 0);
@@ -142,7 +132,9 @@ public class Main {
             while (point == null) {
                 synchronized (doorBell) {
                     try {
-                        doorBell.wait(timeout);
+                        if (timeout > 0) {
+                            doorBell.wait(timeout);
+                        }
                         update();
                     } catch (final InterruptedException ie) {
                         ie.getStackTrace();
@@ -161,49 +153,69 @@ public class Main {
             }
         }
 
-        class ZPos implements Comparable<ZPos>{
+        static class ZPos implements Comparable<ZPos> {
 
-            int x0,y0,x1,y1,x2,y2;
-            float z0,z1,z2;
-            float midz;
+            int x0, y0, x1, y1, x2, y2;
+            float z0, z1, z2;
+            float z;
             float howVisible;
             int rgb;
+
             @Override
             public int compareTo(ZPos zPos) {
-                return Float.compare(midz, zPos.midz);
+                return Float.compare(z, zPos.z);
             }
-            ZPos(int t, int rgb, float howVisible){
+
+            ZPos(int t, int rgb, float howVisible) {
                 int v0 = F32Triangle3D.getV0(t);
                 int v1 = F32Triangle3D.getV1(t);
                 int v2 = F32Triangle3D.getV2(t);
-                x0=(int) F32Vec3.getX(v0);
-                y0=(int) F32Vec3.getY(v0);
-                z0= F32Vec3.getZ(v0);
-                x1=(int) F32Vec3.getX(v1);
-                y1=(int) F32Vec3.getY(v1);
-                z1= F32Vec3.getZ(v1);
-                x2=(int) F32Vec3.getX(v2);
-                y2=(int) F32Vec3.getY(v2);
-                z2= F32Vec3.getZ(v2);
+                x0 = (int) F32Vec3.getX(v0);
+                y0 = (int) F32Vec3.getY(v0);
+                z0 = F32Vec3.getZ(v0);
+                x1 = (int) F32Vec3.getX(v1);
+                y1 = (int) F32Vec3.getY(v1);
+                z1 = F32Vec3.getZ(v1);
+                x2 = (int) F32Vec3.getX(v2);
+                y2 = (int) F32Vec3.getY(v2);
+                z2 = F32Vec3.getZ(v2);
                 this.rgb = rgb;
-                this.howVisible = howVisible;
-               // midz = (z0+z1+z2)/3;
-                midz = Math.min(z0, Math.min(z1,z2));
-
+                this.howVisible = Math.abs(howVisible);
+                z = Math.min(z0, Math.min(z1, z2));
             }
 
-            int create(){
-                return I32Triangle2D.createTriangle(x0, y0, x1, y1, x2, y2, rgb, howVisible);
+            static boolean normalizedCol = false;
+            static boolean normalizedWhite = false;
+            static boolean white = false;
+
+            int create() {
+                int r = ((rgb & 0xff0000) >> 16);
+                int g = ((rgb & 0x00ff00) >> 8);
+                int b = ((rgb & 0x0000ff) >> 0);
+
+                if (normalizedCol) {
+                    r = r - (int) (20 * howVisible);
+                    g = g - (int) (20 * howVisible);
+                    b = b - (int) (20 * howVisible);
+                } else if (normalizedWhite) {
+                    r = g = b = (int) (0xff + (3 * howVisible));
+                } else if (white) {
+                    r = g = b = 0xff;
+                }
+
+                return I32Triangle2D.createTriangle(x0, y0, x1, y1, x2, y2, (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff));
+
 
             }
         }
+
 
         void update() {
             final long elapsedMillis = System.currentTimeMillis() - startMillis;
             float theta = elapsedMillis * .001f;
 
             if ((frames++ % 50) == 0) {
-                //  System.out.println("Frames " + frames + " Theta = " + theta + " FPS = " + ((frames * 1000) / elapsedMillis));
+                System.out.println("Frames " + frames + " Theta = " + theta + " FPS = " + ((frames * 1000) / elapsedMillis)+ " Vertices "+kernel.vec2EntriesCount);
             }
 
             mark.resetAll();
@@ -218,9 +230,9 @@ public class Main {
 
             boolean showHidden = false;
 
-            // Loop through the triangles
-            List<ZPos> zpos = new ArrayList<>();
 
+            List<ZPos> zpos = new ArrayList<>();
+            // Loop through the triangles
             for (int t = 0; t < F32Triangle3D.count; t++) {
                 int rotatedTri = F32Triangle3D.mulMat4(t, rotXYZMat4);
                 int translatedTri = F32Triangle3D.addVec3(rotatedTri, moveAwayVec3);
@@ -249,7 +261,6 @@ public class Main {
                     int projected = F32Triangle3D.mulMat4(translatedTri, projectionMat4);
                     int centered = F32Triangle3D.mulScaler(projected, view.image.getHeight() / 4);
                     centered = F32Triangle3D.addScaler(centered, view.image.getHeight() / 2);
-
                     zpos.add(new ZPos(centered, F32Triangle3D.getRGB(centered), howVisible));
                 }
 
@@ -258,17 +269,15 @@ public class Main {
 
             Collections.sort(zpos);
 
-            for (ZPos z:zpos){
+            for (ZPos z : zpos) {
                 z.create();
             }
-
 
             kernel.triangle2DEntries = I32Triangle2D.entries;
             kernel.triangle2DEntriesCount = I32Triangle2D.count;
             kernel.vec2Entries = I32Vec2.entries;
             kernel.vec2EntriesCount = I32Vec2.count;
             kernel.colors = I32Triangle2D.colors;
-            kernel.normals = I32Triangle2D.normals;
             kernel.execute(kernel.range);
             view.update();
             viewer.repaint();
@@ -280,14 +289,13 @@ public class Main {
         private int[] rgb;
         private int width;
         private int height;
-        static final float deltaSquare = 1000f;
+
         Range range;
         int triangle2DEntries[];
         int triangle2DEntriesCount;
         int vec2Entries[];
         int vec2EntriesCount;
         int colors[];
-        float normals[];
 
 
         public RasterKernel(View view) {
@@ -304,28 +312,10 @@ public class Main {
             rgb = _rgb;
         }
 
-        public void wirerun() {
-            final int gid = getGlobalId();
-            int x = gid % width;
-            int y = gid / width;
-            int col = 0x00000;
-            for (int t = 0; t < triangle2DEntriesCount; t++) {
-                int v0 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V0];
-                int v1 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V1];
-                int v2 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V2];
-                int x0 = vec2Entries[v0 * I32Vec2.SIZE + I32Vec2.X];
-                int y0 = vec2Entries[v0 * I32Vec2.SIZE + I32Vec2.Y];
-                int x1 = vec2Entries[v1 * I32Vec2.SIZE + I32Vec2.X];
-                int y1 = vec2Entries[v1 * I32Vec2.SIZE + I32Vec2.Y];
-                int x2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.X];
-                int y2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.Y];
-                if (I32Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || I32Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || I32Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
-                    col = 0xffffff;
-                }
-            }
 
-            rgb[gid] = col;
-        }
+        static final boolean wire = false;
+        static final boolean fill = true;
+        static final float deltaSquare = 1000f;
 
         public void run() {
             final int gid = getGlobalId();
@@ -342,39 +332,10 @@ public class Main {
                 int y1 = vec2Entries[v1 * I32Vec2.SIZE + I32Vec2.Y];
                 int x2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.X];
                 int y2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.Y];
-                if (I32Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
+                if (fill && I32Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
                     col = colors[t];
-               // } else if (I32Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || I32Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || I32Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
-                 //   col = 0xffffff;
-                }
-            }
-
-            rgb[gid] = col;
-        }
-
-        public void normrun() {
-            final int gid = getGlobalId();
-            int x = gid % width;
-            int y = gid / width;
-            int col = 0x00000;
-            for (int t = 0; t < triangle2DEntriesCount; t++) {
-                int v0 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V0];
-                int v1 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V1];
-                int v2 = triangle2DEntries[I32Triangle2D.SIZE * t + I32Triangle2D.V2];
-                int x0 = vec2Entries[v0 * I32Vec2.SIZE + I32Vec2.X];
-                int y0 = vec2Entries[v0 * I32Vec2.SIZE + I32Vec2.Y];
-                int x1 = vec2Entries[v1 * I32Vec2.SIZE + I32Vec2.X];
-                int y1 = vec2Entries[v1 * I32Vec2.SIZE + I32Vec2.Y];
-                int x2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.X];
-                int y2 = vec2Entries[v2 * I32Vec2.SIZE + I32Vec2.Y];
-                if (I32Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
-                    int r = ((colors[t] & 0xff0000) - ((int) (3 * -normals[t])) << 16);
-                    int g = ((colors[t] & 0x00ff00) - ((int) (3 * -normals[t])) << 8);
-                    int b = ((colors[t] & 0x0000ff) - ((int) (3 * -normals[t])));
-                    col = (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
-
-                } else if (I32Triangle2D.online(x, y, x0, y0, x1, y1, deltaSquare) || I32Triangle2D.online(x, y, x1, y1, x2, y2, deltaSquare) || I32Triangle2D.online(x, y, x2, y2, x0, y0, deltaSquare)) {
-                    col = 0xffffff;
+                } else if (wire && I32Triangle2D.onedge(x, y, x0, y0, x1, y1, x2, y2, deltaSquare)) {
+                    col =colors[t];
                 }
             }
 
@@ -391,7 +352,7 @@ public class Main {
         kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.GPU);
         ViewFrame vf = new ViewFrame("View", kernel);
 
-        for (Point point = vf.waitForPoint(1); point != null; point = vf.waitForPoint(10)) {
+        for (Point point = vf.waitForPoint(0); point != null; point = vf.waitForPoint(10)) {
             System.out.println("You pressed " + point);
         }
 
