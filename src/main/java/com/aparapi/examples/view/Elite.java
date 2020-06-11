@@ -119,7 +119,7 @@ class Elite {
                                 float nx = hex2Float(lm.group(3));
                                 float ny = hex2Float(lm.group(4));
                                 float nz = hex2Float(lm.group(5));
-                                boolean abinormal =!(nx < 0 || ny < 0 || nz < 0);
+                                boolean abinormal = true;//!(nx < 0 || ny < 0 || nz < 0);
 
                                 int v0 = vec3base + Integer.parseInt(lm.group(6));
                                 int v1 = vec3base + Integer.parseInt(lm.group(7));
