@@ -67,6 +67,11 @@ public class F32Vec3 {
         rhs *= SIZE;
         return createVec3(entries[lhs + X] * entries[rhs + X], entries[lhs + Y] * entries[rhs + Y], entries[lhs + Z] * entries[rhs + Z]);
     }
+    static int divVec3(int lhs, int rhs) {
+        lhs *= SIZE;
+        rhs *= SIZE;
+        return createVec3(entries[lhs + X] / entries[rhs + X], entries[lhs + Y] / entries[rhs + Y], entries[lhs + Z] / entries[rhs + Z]);
+    }
 
 
     static float sumOfSquares(int i) {

@@ -11,38 +11,51 @@ class F32Mesh3D {
     }
     final int SIZE = 1;
     final int MAX = 400;
+    public final static int ABINORMAL = -1;
 
     int triCount = 0;
     int triEntries[] = new int[MAX * SIZE];
+    int normalEntries[] = new int[MAX *SIZE];
     int vecCount = 0;
     int vecEntries[] = new int[MAX * SIZE];
-    int vecSum;
-    int vecCenter;
+  //  int vecSum = F32Vec3.createVec3(0,0,0);
+ //   int vecCenter;
 
-    F32Mesh3D tri(int v0, int v1, int v2, int rgb) {
+    F32Mesh3D tri(int v0, int v1, int v2, int rgb, int vN) {
         int newTri = F32Triangle3D.createTriangle3D(v0, v1, v2, rgb);
+        normalEntries[triCount] = vN;
         triEntries[triCount++]= newTri;
-        int newTriCentre =  F32Triangle3D.getCentre(newTri);
+        int newTriCentreVec3 =  F32Triangle3D.getCentre(newTri);
+        if (vN != ABINORMAL) {
+            int normFromTriVec3 = F32Triangle3D.normal(newTri);
+            System.out.println("norms "+F32Vec3.asString(vN)+ " vs "+F32Vec3.asString(normFromTriVec3));
+            int normDotProd = F32Vec3.dotProd(normFromTriVec3, vN);
+            System.out.println("normDotProd "+F32Vec3.asString(normDotProd));
+        }
         if (triCount == 1 ){
-            triSum =newTriCentre;
+            triSum =newTriCentreVec3;
         }else{
-            triSum = F32Vec3.addVec3(triSum, newTriCentre);
+            triSum = F32Vec3.addVec3(triSum, newTriCentreVec3);
             if (triCount >2) {
-                triCenter = F32Vec3.divScaler(triSum, triCount);
-                int newFaceCenterNormal = F32Triangle3D.normal(newTriCentre);
+                triCenter = F32Vec3.divScaler(triSum, triCount+1);
+                int newFaceCenterNormal = F32Triangle3D.normal(newTriCentreVec3);
             }
         }
 
         return this;
     }
+    F32Mesh3D tri(int v0, int v1, int v2, int rgb) {
+        return tri(v0, v1, v2, rgb, ABINORMAL);
 
-    void fin(){
-        cube(F32Vec3.getX(triCenter),F32Vec3.getY(triCenter), F32Vec3.getY(triCenter), .1f );
-        vecCenter = F32Vec3.divScaler(vecSum, 3*(vecCount+3));
-        cube(F32Vec3.getX(vecCenter),F32Vec3.getY(vecCenter), F32Vec3.getY(vecCenter), .2f );
     }
 
-    F32Mesh3D quad(int v0, int v1, int v2, int v3, int col) {
+    void fin(){
+        cube(F32Vec3.getX(triCenter),F32Vec3.getY(triCenter), F32Vec3.getZ(triCenter), .1f );
+      //  vecCenter = F32Vec3.divScaler(vecSum, 3*(vecCount+3));
+      //  cube(F32Vec3.getX(vecCenter),F32Vec3.getY(vecCenter), F32Vec3.getZ(vecCenter), .02f );
+    }
+
+    F32Mesh3D quad(int v0, int v1, int v2, int v3, int rgb, int vN) {
   /*
        v0-----v1
         |\    |
@@ -53,11 +66,15 @@ class F32Mesh3D {
        v3-----v2
    */
 
-        tri(v0, v1, v2, col);
-        tri(v0, v2, v3, col);
+        tri(v0, v1, v2, rgb, vN);
+        tri(v0, v2, v3, rgb, vN);
         return this;
     }
-    F32Mesh3D pent(int v0, int v1, int v2, int v3, int v4, int col) {
+    F32Mesh3D quad(int v0, int v1, int v2, int v3, int rgb) {
+        return quad(v0, v1, v2, v3, rgb, ABINORMAL);
+    }
+
+    F32Mesh3D pent(int v0, int v1, int v2, int v3, int v4, int rgb, int vN) {
   /*
        v0-----v1
        |\    | \
@@ -68,13 +85,15 @@ class F32Mesh3D {
        v4-----v3
    */
 
-        tri(v0, v1, v3, col);
-        tri(v1, v2, v3, col);
-        tri(v0, v3, v4, col);
+        tri(v0, v1, v3, rgb, vN);
+        tri(v1, v2, v3, rgb, vN);
+        tri(v0, v3, v4, rgb, vN);
         return this;
     }
-
-    F32Mesh3D hex(int v0, int v1, int v2, int v3, int v4, int v5, int col) {
+    F32Mesh3D pent(int v0, int v1, int v2, int v3, int v4, int rgb){
+        return pent(v0, v1, v2, v3, v4, rgb, ABINORMAL);
+    }
+    F32Mesh3D hex(int v0, int v1, int v2, int v3, int v4, int v5, int rgb, int vN) {
   /*
        v0-----v1
       / |\    | \
@@ -85,11 +104,14 @@ class F32Mesh3D {
        v4-----v3
    */
 
-        tri(v0, v1, v3, col);
-        tri(v1, v2, v3, col);
-        tri(v0, v3, v4, col);
-        tri(v0, v4, v5, col);
+        tri(v0, v1, v3, rgb, vN);
+        tri(v1, v2, v3, rgb, vN);
+        tri(v0, v3, v4, rgb, vN);
+        tri(v0, v4, v5, rgb, vN);
         return this;
+    }
+    F32Mesh3D hex(int v0, int v1, int v2, int v3, int v4, int v5, int rgb) {
+        return hex(v0, v1, v2, v3, v4 ,v5, rgb, ABINORMAL);
     }
 
     /*
@@ -146,18 +168,20 @@ http://paulbourke.net/dataformats/obj/
             float z,
             float s) {
 
-        int v1 = vec3(x - (s * .30631559f), y - (s * .20791225f), z + (s * .12760004f));
-        int v2 = vec3(x - (s * .12671047f), y - (s * .20791227f), z + (s * .30720518f));
-        int v3 = vec3(x - (s * .12671045f), y - (s * .38751736f), z + (s * .12760002f));
-        int v4 = vec3(x - (s * .30631556f), y - (s * .20791227f), z + (s * .48681026f));
-        int v5 = vec3(x - (s * .48592068f), y - (s * .20791225f), z + (s * .30720514f));
-        int v6 = vec3(x - (s * .30631556f), y - (s * .56712254f), z + (s * .48681026f));
-        int v7 = vec3(x - (s * .12671047f), y - (s * .56712254f), z + (s * .30720512f));
-        int v8 = vec3(x - (s * .12671042f), y - (s * .3875174f), z + (s * .48681026f));
-        int v9 = vec3(x - (s * .48592068f), y - (s * .38751736f), z + (s * .1276f));
-        int v10 = vec3(x - (s * .30631556f), y - (s * .56712254f), z + (s * .1276f));
-        int v11 = vec3(x - (s * .48592068f), y - (s * .56712254f), z + (s * .30720512f));
-        int v12 = vec3(x - (s * .48592068f), y - (s * .38751743f), z + (s * .4868103f));
+        int v1 = vec3(x + (s * .30631559f), y + (s * .20791225f), z + (s * .12760004f));
+        int v2 = vec3(x + (s * .12671047f), y + (s * .20791227f), z + (s * .30720518f));
+        int v3 = vec3(x + (s * .12671045f), y + (s * .38751736f), z + (s * .12760002f));
+        int v4 = vec3(x + (s * .30631556f), y + (s * .20791227f), z + (s * .48681026f));
+        int v5 = vec3(x + (s * .48592068f), y + (s * .20791225f), z + (s * .30720514f));
+        int v6 = vec3(x + (s * .30631556f), y + (s * .56712254f), z + (s * .48681026f));
+        int v7 = vec3(x + (s * .12671047f), y + (s * .56712254f), z + (s * .30720512f));
+        int v8 = vec3(x + (s * .12671042f), y + (s * .3875174f), z + (s * .48681026f));
+        int v9 = vec3(x + (s * .48592068f), y + (s * .38751736f), z + (s * .1276f));
+        int v10 = vec3(x + (s * .30631556f), y + (s * .56712254f), z + (s * .1276f));
+        int v11 = vec3(x + (s * .48592068f), y + (s * .56712254f), z + (s * .30720512f));
+        int v12 = vec3(x + (s * .48592068f), y + (s * .38751743f), z + (s * .4868103f));
+
+
 
 
         tri(v1, v2, v3, 0xff0000);
@@ -198,11 +222,11 @@ http://paulbourke.net/dataformats/obj/
     public int vec3(float x, float y, float z) {
         int newVec = F32Vec3.createVec3(x,y, z);
         vecEntries[vecCount++]=newVec;
-        if (vecCount == 1 ){
-            vecSum =newVec;
-        }else{
-            vecSum = F32Vec3.addVec3(vecSum, newVec);
-        }
+    //    if (vecCount == 1 ){
+         //   vecSum =newVec;
+       // }else{
+      //      vecSum = F32Vec3.addVec3(vecSum, newVec);
+      //  }
         return newVec;
     }
 
