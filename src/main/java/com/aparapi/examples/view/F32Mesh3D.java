@@ -38,8 +38,8 @@ class F32Mesh3D {
 
     void fin(){
         cube(F32Vec3.getX(triCenter),F32Vec3.getY(triCenter), F32Vec3.getY(triCenter), .1f );
-        vecCenter = F32Vec3.divScaler(vecSum, 3);
-        cube(F32Vec3.getX(vecCenter),F32Vec3.getY(vecCenter), F32Vec3.getY(vecCenter), .1f );
+        vecCenter = F32Vec3.divScaler(vecSum, 3*(vecCount+3));
+        cube(F32Vec3.getX(vecCenter),F32Vec3.getY(vecCenter), F32Vec3.getY(vecCenter), .2f );
     }
 
     F32Mesh3D quad(int v0, int v1, int v2, int v3, int col) {
@@ -54,7 +54,6 @@ class F32Mesh3D {
    */
 
         tri(v0, v1, v2, col);
-
         tri(v0, v2, v3, col);
         return this;
     }
