@@ -2,7 +2,7 @@ package com.aparapi.examples.view;
 
 public class F32Vec3 {
     static final int SIZE = 3;
-    static final int MAX = 400;
+    static final int MAX = 1600;
     static final int X = 0;
     static final int Y = 1;
     static final int Z = 2;

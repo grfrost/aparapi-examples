@@ -9,8 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class Elite {
-
-
     static Pattern remPattern = Pattern.compile("^ *REM(.*)$");
     static Pattern colonPattern = Pattern.compile("^ *(:) *$");
     static Pattern verticesPattern = Pattern.compile("^ *(vertices) *$");
@@ -63,8 +61,9 @@ class Elite {
     static void load(String name) {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(new File("/home/gfrost/github/grfrost/aparapi-build/examples/github/aparapi-examples/src/main/java/com/aparapi/examples/view/Elite.txt")));
-            int vec3base = F32Vec3.count;
+
             State state = State.AWAITING_NAME;
+            F32Mesh3D mesh= null;
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                 line = line.trim();
                 Matcher lm;
@@ -76,6 +75,8 @@ class Elite {
                         case AWAITING_NAME: {
                             if ((lm = namePattern.matcher(line)).matches() && lm.group(1).equals(name)) {
                                 state = State.AWAITING_LAZER;
+                                mesh = new F32Mesh3D(name);
+
                             }
                             break;
                         }
@@ -102,8 +103,8 @@ class Elite {
                                 float x = hex2Float(lm.group(1));
                                 float y = hex2Float(lm.group(2));
                                 float z = hex2Float(lm.group(3));
+                                mesh.vec3(x, y, z);
 
-                                F32Vec3.createVec3(x,y, z);
                             } else if ((lm = facesPattern.matcher(line)).matches()) {
                                 state = State.AWAITING_HUE_LIG_SAT;
                             }
@@ -121,28 +122,29 @@ class Elite {
                                 float nz = hex2Float(lm.group(5));
                                 boolean abinormal = true;//!(nx < 0 || ny < 0 || nz < 0);
 
-                                int v0 = vec3base + Integer.parseInt(lm.group(6));
-                                int v1 = vec3base + Integer.parseInt(lm.group(7));
-                                int v2 = vec3base + Integer.parseInt(lm.group(8));
+                                int v0 = mesh.vecbase + Integer.parseInt(lm.group(6));
+                                int v1 = mesh.vecbase + Integer.parseInt(lm.group(7));
+                                int v2 = mesh.vecbase + Integer.parseInt(lm.group(8));
 
                                 if (lm.groupCount()==8){
-                                    F32Triangle3D.createTriangle3D(v0, v1, v2, abinormal ? 0x00f000 : 0x000f00);
+                                    mesh.tri(v0, v1, v2, abinormal ? 0x00f000 : 0x000f00);
                                 }else {
-                                    int v3 = vec3base + Integer.parseInt(lm.group(9));
+                                    int v3 = mesh.vecbase + Integer.parseInt(lm.group(9));
                                     if (lm.groupCount() == 9) {
-                                        F32Triangle3D.quad(v0, v1,v2, v3,  abinormal?0xf00000:0x0f0000);
+                                        mesh.quad(v0, v1,v2, v3,  abinormal?0xf00000:0x0f0000);
                                     } else {
-                                        int v4 = vec3base + Integer.parseInt(lm.group(10));
+                                        int v4 = mesh.vecbase + Integer.parseInt(lm.group(10));
                                         if (lm.groupCount() == 10) {
-                                            F32Triangle3D.pent(v0, v1, v2, v3, v4, abinormal ? 0x0000f0 : 0x00000f);
+                                            mesh.pent(v0, v1, v2, v3, v4, abinormal ? 0x0000f0 : 0x00000f);
                                         } else {
-                                            int v5 = vec3base + Integer.parseInt(lm.group(11));
+                                            int v5 = mesh.vecbase + Integer.parseInt(lm.group(11));
                                             System.out.println("normals {"+nx+","+ny+","+nz+"} abinormal="+abinormal);
-                                            F32Triangle3D.hex(v0, v1, v2, v3, v4, v5, abinormal ? 0xffffff : 0x0f0f0f);
+                                            mesh.hex(v0, v1, v2, v3, v4, v5, abinormal ? 0xffffff : 0x0f0f0f);
                                         }
                                     }
                                 }
                             } else if ((lm = hueLigSatPattern.matcher(line)).matches()) {
+                                mesh.fin();
                                 return;
                             } else {
                                 System.out.println("In " + state + " skipping " + line);

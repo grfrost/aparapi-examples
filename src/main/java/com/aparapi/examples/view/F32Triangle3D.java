@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 class F32Triangle3D {
     static final int SIZE = 4;
-    static final int MAX = 400;
+    static final int MAX = 1600;
     static final int V0 = 0;
     static final int V1 = 1;
     static final int V2 = 2;
@@ -58,176 +58,9 @@ class F32Triangle3D {
         return createTriangle3D(F32Vec3.addScaler(entries[i + V0], s), F32Vec3.addScaler(entries[i + V1], s), F32Vec3.addScaler(entries[i + V2], s), entries[i + RGB]);
     }
 
-    static int quad(int v0, int v1, int v2, int v3, int col) {
-  /*
-       v0-----v1
-        |\    |
-        | \   |
-        |  \  |
-        |   \ |
-        |    \|
-       v3-----v2
-   */
-
-        createTriangle3D(v0, v1, v2, col);
-
-        return createTriangle3D(v0, v2, v3, col) - 1;
-    }
-    static int pent(int v0, int v1, int v2, int v3, int v4, int col) {
-  /*
-       v0-----v1
-       |\    | \
-       | \   |  \
-       |  \  |   v2
-       |   \ |  /
-       |    \| /
-       v4-----v3
-   */
-
-        createTriangle3D(v0, v1, v3, col);
-        createTriangle3D(v1, v2, v3, col);
-
-        return createTriangle3D(v0, v3, v4, col) -1;
-    }
-
-    static int hex(int v0, int v1, int v2, int v3, int v4, int v5, int col) {
-  /*
-       v0-----v1
-      / |\    | \
-     /  | \   |  \
-    v5  |  \  |   v2
-     \  |   \ |  /
-      \ |    \| /
-       v4-----v3
-   */
-
-        createTriangle3D(v0, v1, v3, col);
-        createTriangle3D(v1, v2, v3, col);
-
-        createTriangle3D(v0, v3, v4, col);
-                return createTriangle3D(v0, v4, v5, col)- 1;
-    }
-
-    /*
-               a-----------d
-              /|          /|
-             / |         / |
-           h------------g  |
-           |   |        |  |
-           |   b--------|--c
-           |  /         | /
-           | /          |/
-           e------------f
-
-     */
-
-
-    static void cube(
-            float x,
-            float y,
-            float z,
-            float s) {
-        int a = F32Vec3.createVec3(x - (s * .5f), y - (s * .5f), z - (s * .5f));  //000  000 111 111
-        int b = F32Vec3.createVec3(x - (s * .5f), y + (s * .5f), z - (s * .5f));  //010  010 101 101
-        int c = F32Vec3.createVec3(x + (s * .5f), y + (s * .5f), z - (s * .5f));  //110  011 001 100
-        int d = F32Vec3.createVec3(x + (s * .5f), y - (s * .5f), z - (s * .5f));  //100  001 011 110
-        int e = F32Vec3.createVec3(x - (s * .5f), y + (s * .5f), z + (s * .5f));  //011  110 100 001
-        int f = F32Vec3.createVec3(x + (s * .5f), y + (s * .5f), z + (s * .5f));  //111  111 000 000
-        int g = F32Vec3.createVec3(x + (s * .5f), y - (s * .5f), z + (s * .5f));  //101  101 010 010
-        int h = F32Vec3.createVec3(x - (s * .5f), y - (s * .5f), z + (s * .5f));  //001  100 110 011
-        quad(a, b, c, d, 0xff0000); //front
-        quad(b, e, f, c, 0x0000ff); //top
-        quad(d, c, f, g, 0xffff00); //right
-        quad(h, e, b, a, 0xffffff); //left
-        quad(g, f, e, h, 0x00ff00);//back
-        quad(g, h, a, d, 0xffa500);//bottom
-    }
-
-
-    static Pattern vpattern = Pattern.compile("^ *v *([0-9.e]+) *([0-9.e]+) *([0-9.e]+) *$");
-    static Pattern fpattern = Pattern.compile("^ *f *([0-9]+) *([0-9]+) *([0-9]+) *$");
-
-    static void load(File f) {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(f));
-            final int MAX_VERT = 500;
-            int verticesCount = 1;
-            int vertices[] = new int[MAX_VERT];
-            int facesCount = 1;
-            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                Matcher matcher = vpattern.matcher(line);
-                if (matcher.matches()) {
-                    vertices[verticesCount++] = F32Vec3.createVec3(Float.parseFloat(matcher.group(1)), Float.parseFloat(matcher.group(2)), Float.parseFloat(matcher.group(3)));
-                } else {
-                    matcher = fpattern.matcher(line);
-                    if (matcher.matches()) {
-                        createTriangle3D(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)), Integer.parseInt(matcher.group(3)), 0xFF000 >> (facesCount++));
-                    } else {
-                        System.out.println("Skipping " + line);
-                    }
-                }
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-
-
-    /*
-
-
-http://paulbourke.net/dataformats/obj/
-
-     */
-
-
-    static void cubeoctahedron(
-            float x,
-            float y,
-            float z,
-            float s) {
-
-        int v1 = F32Vec3.createVec3(x - (s * .30631559f), y - (s * .20791225f), z + (s * .12760004f));
-        int v2 = F32Vec3.createVec3(x - (s * .12671047f), y - (s * .20791227f), z + (s * .30720518f));
-        int v3 = F32Vec3.createVec3(x - (s * .12671045f), y - (s * .38751736f), z + (s * .12760002f));
-        int v4 = F32Vec3.createVec3(x - (s * .30631556f), y - (s * .20791227f), z + (s * .48681026f));
-        int v5 = F32Vec3.createVec3(x - (s * .48592068f), y - (s * .20791225f), z + (s * .30720514f));
-        int v6 = F32Vec3.createVec3(x - (s * .30631556f), y - (s * .56712254f), z + (s * .48681026f));
-        int v7 = F32Vec3.createVec3(x - (s * .12671047f), y - (s * .56712254f), z + (s * .30720512f));
-        int v8 = F32Vec3.createVec3(x - (s * .12671042f), y - (s * .3875174f), z + (s * .48681026f));
-        int v9 = F32Vec3.createVec3(x - (s * .48592068f), y - (s * .38751736f), z + (s * .1276f));
-        int v10 = F32Vec3.createVec3(x - (s * .30631556f), y - (s * .56712254f), z + (s * .1276f));
-        int v11 = F32Vec3.createVec3(x - (s * .48592068f), y - (s * .56712254f), z + (s * .30720512f));
-        int v12 = F32Vec3.createVec3(x - (s * .48592068f), y - (s * .38751743f), z + (s * .4868103f));
-
-
-        createTriangle3D(v1, v2, v3, 0xff0000);
-        createTriangle3D(v4, v2, v5, 0x7f8000);
-        createTriangle3D(v5, v2, v1, 0x3fc000);
-        createTriangle3D(v6, v7, v8, 0x1fe000);
-        createTriangle3D(v9, v10, v11, 0x0ff000);
-        createTriangle3D(v8, v2, v4, 0x07f800);
-        createTriangle3D(v5, v1, v9, 0x03fc00);
-        createTriangle3D(v3, v7, v10, 0x01fe00);
-        createTriangle3D(v8, v7, v2, 0x00ff00);
-        createTriangle3D(v2, v7, v3, 0x007f80);
-        createTriangle3D(v8, v4, v6, 0x003fc0);
-        createTriangle3D(v6, v4, v12, 0x001fe0);
-        createTriangle3D(v11, v12, v9, 0x000ff0);
-        createTriangle3D(v9, v12, v5, 0x0007f8);
-        createTriangle3D(v7, v6, v10, 0x0003fc);
-        createTriangle3D(v6, v11, v10, 0x0001fe);
-        createTriangle3D(v1, v3, v9, 0x0000ff);
-        createTriangle3D(v9, v3, v10, 0x00007f);
-        createTriangle3D(v12, v4, v5, 0x00003f);
-        createTriangle3D(v6, v12, v11, 0x00001f);
-
-
+    public static int getCentre(int i){
+        // the average of all the vertices
+        return F32Vec3.divScaler(F32Vec3.addVec3(F32Vec3.addVec3(getV0(i), getV1(i)), getV2(i)), 3);
     }
 
 
@@ -273,13 +106,5 @@ http://paulbourke.net/dataformats/obj/
         return F32Vec3.divScaler(normalVec3,  F32Vec3.sumOfSquares(normalVec3));
     }
 
-    public static void rubric(float s) {
-        for (int x = -1; x < 2; x++) {
-            for (int y = -1; y < 2; y++) {
-                for (int z = -1; z < 2; z++) {
-                    F32Triangle3D.cube(x * .5f, y * .5f, z * .5f, s);
-                }
-            }
-        }
-    }
+
 }

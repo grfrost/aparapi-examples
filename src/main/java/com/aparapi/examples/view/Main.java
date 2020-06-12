@@ -22,13 +22,10 @@ public class Main {
         enum DisplayMode {FILL, WIRE, WIRE_SHOW_HIDDEN, WIRE_AND_FILL};
 
         public static final ColourMode colourMode = ColourMode.COLOUR.NORMALIZED_INV_WHITE;
-        public static final DisplayMode displayMode = DisplayMode.FILL;
+        public static final DisplayMode displayMode = DisplayMode.WIRE_SHOW_HIDDEN;
         public static final float deltaSquare = 10000f;
         public static final String eliteAsset = "CONSTRICTOR";// null;//"COBRA";//"CONSTRICTOR";//COBRAMK1";
         public static final float thetaDelta = 0.001f;
-
-
-
     }
     public static class View {
         private BufferedImage image;
@@ -126,12 +123,12 @@ public class Main {
             });
 
 
-            //F32Triangle3D.rubric(.49f);
-           // F32Triangle3D.cubeoctahedron(0, 0, 0, 4);
+            // (new F32Mesh3D("rubric")).rubric(.49f);
+             (new F32Mesh3D("cubeoctahedron")).cubeoctahedron(0, 0, 0, 4);
             if (Config.eliteAsset != null) {
                 Elite.load(Config.eliteAsset);
             }else {
-                F32Triangle3D.cube(0, 0, 0, 2f);
+                (new F32Mesh3D("cube")).cube(0, 0, 0, 2f);
             }
             //   Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
 
