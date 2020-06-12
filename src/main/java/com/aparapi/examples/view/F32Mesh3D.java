@@ -28,9 +28,16 @@ class F32Mesh3D {
         int newTriCentreVec3 =  F32Triangle3D.getCentre(newTri);
         if (vN != ABINORMAL) {
             int normFromTriVec3 = F32Triangle3D.normal(newTri);
-            System.out.println("norms "+F32Vec3.asString(vN)+ " vs "+F32Vec3.asString(normFromTriVec3));
-            int normDotProd = F32Vec3.dotProd(normFromTriVec3, vN);
-            System.out.println("normDotProd "+F32Vec3.asString(normDotProd));
+
+            float normDotProd = F32Vec3.dotProdAsScaler(normFromTriVec3, vN);
+
+          //  float normaDotProdNormalized = F32Vec3.sumOfSquares(normDotProd);
+            System.out.print("norms "+F32Vec3.asString(vN)+ " vs "+F32Vec3.asString(normFromTriVec3));
+            System.out.println("   normDotProd "+normDotProd);
+            if (normDotProd < 0) {
+                F32Triangle3D.fillTriangle3D(newTri, v0, v2, v1, rgb);
+            }
+           // System.out.println("   normDotProdNormalized "+normaDotProdNormalized);
         }
         if (triCount == 1 ){
             triSum =newTriCentreVec3;
@@ -50,7 +57,7 @@ class F32Mesh3D {
     }
 
     void fin(){
-        cube(F32Vec3.getX(triCenter),F32Vec3.getY(triCenter), F32Vec3.getZ(triCenter), .1f );
+     //   cube(F32Vec3.getX(triCenter),F32Vec3.getY(triCenter), F32Vec3.getZ(triCenter), .1f );
       //  vecCenter = F32Vec3.divScaler(vecSum, 3*(vecCount+3));
       //  cube(F32Vec3.getX(vecCenter),F32Vec3.getY(vecCenter), F32Vec3.getZ(vecCenter), .02f );
     }

@@ -1,13 +1,5 @@
 package com.aparapi.examples.view;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 class F32Triangle3D {
     static final int SIZE = 4;
     static final int MAX = 1600;
@@ -103,7 +95,7 @@ class F32Triangle3D {
         int line1Vec3 = F32Vec3.subVec3(v1, v0);
         int line2Vec3 = F32Vec3.subVec3(v2, v0);
 
-        return F32Vec3.dotProd(line1Vec3, line2Vec3);
+        return F32Vec3.crossProd(line1Vec3, line2Vec3);
     }
 
     public static int normalSumOfSquares(int i) {

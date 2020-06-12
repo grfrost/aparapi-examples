@@ -87,13 +87,22 @@ public class F32Vec3 {
         return (float) Math.sqrt(sumOfSquares(i));
     }
 
-    static int dotProd(int lhs, int rhs) {
+    static int crossProd(int lhs, int rhs) {
         lhs *= SIZE;
         rhs *= SIZE;
         return createVec3(
                 entries[lhs + Y] * entries[rhs + Z] - entries[lhs + Z] * entries[rhs + X],
                 entries[lhs + Z] * entries[rhs + X] - entries[lhs + X] * entries[rhs + Z],
                 entries[lhs + X] * entries[rhs + Y] - entries[lhs + Y] * entries[rhs + X]);
+
+    }
+    static float dotProdAsScaler(int lhs, int rhs) {
+        lhs *= SIZE;
+        rhs *= SIZE;
+
+       return entries[lhs + X] * entries[rhs + X] + entries[lhs + Y] * entries[rhs + Y] +
+                entries[lhs + Z] * entries[rhs + Z];
+
     }
 
     static String asString(int i) {

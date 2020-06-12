@@ -21,10 +21,10 @@ public class Main {
         enum ColourMode {NORMALIZED_COLOUR, NORMALIZED_INV_COLOUR, COLOUR, NORMALIZED_WHITE, NORMALIZED_INV_WHITE, WHITE};
         enum DisplayMode {FILL, WIRE, WIRE_SHOW_HIDDEN, WIRE_AND_FILL};
 
-        public static final ColourMode colourMode = ColourMode.COLOUR.NORMALIZED_INV_WHITE;
+        public static final ColourMode colourMode = ColourMode.COLOUR.COLOUR;
         public static final DisplayMode displayMode = DisplayMode.WIRE;
         public static final float deltaSquare = 10000f;
-        public static final String eliteAsset = "CONSTRICTOR";// null;//"COBRA";//"CONSTRICTOR";//COBRAMK1";
+        public static final String eliteAsset = "BARREL";// null;//"COBRA";//"CONSTRICTOR";//COBRAMK1";
         public static final float thetaDelta = 0.001f;
     }
     public static class View {
