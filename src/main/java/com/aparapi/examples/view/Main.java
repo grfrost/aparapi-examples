@@ -124,7 +124,7 @@ public class Main {
 
 
             // (new F32Mesh3D("rubric")).rubric(.49f);
-             (new F32Mesh3D("cubeoctahedron")).cubeoctahedron(0, 0, 0, 4);
+             (new F32Mesh3D("cubeoctahedron")).cubeoctahedron(0, 0, 0, 4).fin();
             if (Config.eliteAsset != null) {
                 Elite.load(Config.eliteAsset);
             }else {

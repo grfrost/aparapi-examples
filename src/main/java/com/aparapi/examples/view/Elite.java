@@ -122,22 +122,22 @@ class Elite {
                                 float nz = hex2Float(lm.group(5));
                                 boolean abinormal = true;//!(nx < 0 || ny < 0 || nz < 0);
 
-                                int v0 = mesh.vecbase + Integer.parseInt(lm.group(6));
-                                int v1 = mesh.vecbase + Integer.parseInt(lm.group(7));
-                                int v2 = mesh.vecbase + Integer.parseInt(lm.group(8));
+                                int v0 = mesh.vecEntries[Integer.parseInt(lm.group(6))];
+                                int v1 = mesh.vecEntries[Integer.parseInt(lm.group(7))];
+                                int v2 = mesh.vecEntries[Integer.parseInt(lm.group(8))];
 
                                 if (lm.groupCount()==8){
                                     mesh.tri(v0, v1, v2, abinormal ? 0x00f000 : 0x000f00);
                                 }else {
-                                    int v3 = mesh.vecbase + Integer.parseInt(lm.group(9));
+                                    int v3 = mesh.vecEntries[Integer.parseInt(lm.group(9))];
                                     if (lm.groupCount() == 9) {
                                         mesh.quad(v0, v1,v2, v3,  abinormal?0xf00000:0x0f0000);
                                     } else {
-                                        int v4 = mesh.vecbase + Integer.parseInt(lm.group(10));
+                                        int v4 = mesh.vecEntries[Integer.parseInt(lm.group(10))];
                                         if (lm.groupCount() == 10) {
                                             mesh.pent(v0, v1, v2, v3, v4, abinormal ? 0x0000f0 : 0x00000f);
                                         } else {
-                                            int v5 = mesh.vecbase + Integer.parseInt(lm.group(11));
+                                            int v5 =  mesh.vecEntries[Integer.parseInt(lm.group(11))];
                                             System.out.println("normals {"+nx+","+ny+","+nz+"} abinormal="+abinormal);
                                             mesh.hex(v0, v1, v2, v3, v4, v5, abinormal ? 0xffffff : 0x0f0f0f);
                                         }

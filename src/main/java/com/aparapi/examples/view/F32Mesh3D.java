@@ -1,38 +1,35 @@
 package com.aparapi.examples.view;
 
-import java.util.regex.Matcher;
-
 class F32Mesh3D {
     String name;
-    int vecbase;
-    int tribase;
-    int sum;
-    int center;
+
+    int triSum;
+    int triCenter;
 
     F32Mesh3D(String name){
         this.name = name;
-        this.vecbase = F32Vec3.count;
-        this.tribase = F32Triangle3D.count;
     }
     final int SIZE = 1;
     final int MAX = 400;
 
-    int count = 0;
-     int entries[] = new int[MAX * SIZE];
-
+    int triCount = 0;
+    int triEntries[] = new int[MAX * SIZE];
+    int vecCount = 0;
+    int vecEntries[] = new int[MAX * SIZE];
+    int vecSum;
+    int vecCenter;
 
     F32Mesh3D tri(int v0, int v1, int v2, int rgb) {
-        int newFace = F32Triangle3D.createTriangle3D(v0, v1, v2, rgb);
-        entries[count++]= newFace;
-        int newFaceCentre =  F32Triangle3D.getCentre(newFace);
-        if (count == 1 ){
-            sum =newFaceCentre;
+        int newTri = F32Triangle3D.createTriangle3D(v0, v1, v2, rgb);
+        triEntries[triCount++]= newTri;
+        int newTriCentre =  F32Triangle3D.getCentre(newTri);
+        if (triCount == 1 ){
+            triSum =newTriCentre;
         }else{
-            sum = F32Vec3.addVec3(sum , newFaceCentre);
-
-            if (count >2) {
-                center = F32Vec3.divScaler(sum, count);
-                int newFaceCenterNormal = F32Triangle3D.normal(newFaceCentre);
+            triSum = F32Vec3.addVec3(triSum, newTriCentre);
+            if (triCount >2) {
+                triCenter = F32Vec3.divScaler(triSum, triCount);
+                int newFaceCenterNormal = F32Triangle3D.normal(newTriCentre);
             }
         }
 
@@ -40,7 +37,9 @@ class F32Mesh3D {
     }
 
     void fin(){
-        cube(F32Vec3.getX(center),F32Vec3.getY(center), F32Vec3.getY(center), .1f );
+        cube(F32Vec3.getX(triCenter),F32Vec3.getY(triCenter), F32Vec3.getY(triCenter), .1f );
+        vecCenter = F32Vec3.divScaler(vecSum, 3);
+        cube(F32Vec3.getX(vecCenter),F32Vec3.getY(vecCenter), F32Vec3.getY(vecCenter), .1f );
     }
 
     F32Mesh3D quad(int v0, int v1, int v2, int v3, int col) {
@@ -198,7 +197,14 @@ http://paulbourke.net/dataformats/obj/
     }
 
     public int vec3(float x, float y, float z) {
-        return F32Vec3.createVec3(x,y, z);
+        int newVec = F32Vec3.createVec3(x,y, z);
+        vecEntries[vecCount++]=newVec;
+        if (vecCount == 1 ){
+            vecSum =newVec;
+        }else{
+            vecSum = F32Vec3.addVec3(vecSum, newVec);
+        }
+        return newVec;
     }
 
 

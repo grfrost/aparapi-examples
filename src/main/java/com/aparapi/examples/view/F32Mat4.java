@@ -45,7 +45,7 @@ public class F32Mat4 {
         entries[count * SIZE + X3Y3] = x3y3;
         return count++;
     }
-
+  //  https://stackoverflow.com/questions/28075743/how-do-i-compose-a-rotation-matrix-with-human-readable-angles-from-scratch/28084380#28084380
     static int mulMat4(int lhs, int rhs) {
         lhs *= SIZE;
         rhs *= SIZE;

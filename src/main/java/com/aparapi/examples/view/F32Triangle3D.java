@@ -60,7 +60,12 @@ class F32Triangle3D {
 
     public static int getCentre(int i){
         // the average of all the vertices
-        return F32Vec3.divScaler(F32Vec3.addVec3(F32Vec3.addVec3(getV0(i), getV1(i)), getV2(i)), 3);
+        return F32Vec3.divScaler(getVectorSum(i), 3);
+    }
+
+    public static int getVectorSum(int i){
+        // the sum of all the vertices
+        return F32Vec3.addVec3(F32Vec3.addVec3(getV0(i), getV1(i)), getV2(i));
     }
 
 
