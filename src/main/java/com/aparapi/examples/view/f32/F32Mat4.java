@@ -23,7 +23,7 @@ public class F32Mat4 {
 
     public static float entries[] = new float[MAX_MAT4 * SIZE];
 
-    static int createMat4(float x0y0, float x1y0, float x2y0, float x3y0,
+    public static int createMat4(float x0y0, float x1y0, float x2y0, float x3y0,
                           float x0y1, float x1y1, float x2y1, float x3y1,
                           float x0y2, float x1y2, float x2y2, float x3y2,
                           float x0y3, float x1y3, float x2y3, float x3y3) {

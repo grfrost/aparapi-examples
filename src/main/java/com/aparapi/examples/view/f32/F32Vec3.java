@@ -51,7 +51,7 @@ public class F32Vec3 {
         return createVec3(entries[i + X] / s, entries[i + Y] / s, entries[i + Z] / s);
     }
 
-    static int addVec3(int lhs, int rhs) {
+    public static int addVec3(int lhs, int rhs) {
         lhs *= SIZE;
         rhs *= SIZE;
         return createVec3(entries[lhs + X] + entries[rhs + X], entries[lhs + Y] + entries[rhs + Y], entries[lhs + Z] + entries[rhs + Z]);

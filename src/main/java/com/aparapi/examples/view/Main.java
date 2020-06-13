@@ -8,6 +8,11 @@ import com.aparapi.examples.view.f32.F32Mat4;
 import com.aparapi.examples.view.f32.F32Mesh3D;
 import com.aparapi.examples.view.f32.F32Triangle3D;
 import com.aparapi.examples.view.f32.F32Vec3;
+import com.aparapi.examples.view.f32.mat4x4;
+import com.aparapi.examples.view.f32.projectionMat4x4;
+import com.aparapi.examples.view.f32.rotationMat4x4;
+import com.aparapi.examples.view.f32.tri;
+import com.aparapi.examples.view.f32.vec3;
 import com.aparapi.examples.view.i32.I32Triangle2D;
 import com.aparapi.examples.view.i32.I32Vec2;
 import java.awt.*;
@@ -59,11 +64,11 @@ public class Main {
         private JComponent viewer;
         final long startMillis;
         long frames;
-        int cameraVec3;
-        int lookDirVec3;
-        int projectionMat4;
-        int centerVec3;
-        int moveAwayVec3;
+        vec3 cameraVec3;
+        vec3 lookDirVec3;
+        mat4x4 projectionMat4;
+        vec3 centerVec3;
+        vec3 moveAwayVec3;
 
         static class Mark {
             int markedTriangles3D;
@@ -138,11 +143,12 @@ public class Main {
             }
             //   Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
 
-            cameraVec3 = F32Vec3.createVec3(0, 0, 0);
-            lookDirVec3 = F32Vec3.createVec3(0, 0, 0);
-            projectionMat4 = F32Mat4.createProjectionMatrix(view.image.getWidth(), view.image.getHeight(), 0.1f, 5f, 90f);
-            centerVec3 = F32Vec3.createVec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
-            moveAwayVec3 = F32Vec3.createVec3(0, 0, 12);
+            cameraVec3 = new vec3(0f,0f,0f);
+            lookDirVec3 = new vec3(0f,0f,0f);//F32Vec3.createVec3(0, 0, 0);
+            projectionMat4 = new projectionMat4x4(view.image.getWidth(), view.image.getHeight(), 0.1f, 5f, 90f);
+
+             centerVec3 = new vec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
+            moveAwayVec3 = new vec3(0f, 0f, 12f);
             mark = new Mark();
 
         }
@@ -185,20 +191,20 @@ public class Main {
                 return Float.compare(z, zPos.z);
             }
 
-            ZPos(int t, int rgb, float howVisible) {
-                int v0 = F32Triangle3D.getV0(t);
-                int v1 = F32Triangle3D.getV1(t);
-                int v2 = F32Triangle3D.getV2(t);
-                x0 = (int) F32Vec3.getX(v0);
-                y0 = (int) F32Vec3.getY(v0);
-                z0 = F32Vec3.getZ(v0);
-                x1 = (int) F32Vec3.getX(v1);
-                y1 = (int) F32Vec3.getY(v1);
-                z1 = F32Vec3.getZ(v1);
-                x2 = (int) F32Vec3.getX(v2);
-                y2 = (int) F32Vec3.getY(v2);
-                z2 = F32Vec3.getZ(v2);
-                this.rgb = rgb;
+            ZPos(tri t, float howVisible) {
+                vec3 v0 = t.v0();
+                vec3 v1 = t.v1();
+                vec3 v2 = t.v2();
+                x0 = (int) v0.x();
+                y0 = (int) v0.y();
+                z0 = v0.z();
+                x1 = (int) v1.x();
+                y1 = (int) v1.y();
+                z1 = v1.z();
+                x2 = (int) v2.x();
+                y2 = (int) v2.y();
+                z2 = v2.z();
+                this.rgb = t.rgb();
                 this.howVisible = howVisible;
                 z = Math.min(z0, Math.min(z1, z2));
             }
@@ -228,10 +234,8 @@ public class Main {
 
                 return I32Triangle2D.createTriangle(x0, y0, x1, y1, x2, y2, (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff));
 
-
             }
         }
-
 
         void update() {
             final long elapsedMillis = System.currentTimeMillis() - startMillis;
@@ -243,41 +247,33 @@ public class Main {
 
             mark.resetAll();
 
-            int rotXMat4 = F32Mat4.createRotXMat4(theta * 2);
-            int rotYMat4 = F32Mat4.createRotYMat4(theta / 2);
-            int rotZMat4 = F32Mat4.createRotZMat4(theta);
-            int rotXYMat4 = F32Mat4.mulMat4(rotXMat4, rotYMat4);
-            int rotXYZMat4 = F32Mat4.mulMat4(rotXYMat4, rotZMat4);
+            mat4x4 xyzRot4x4  = new rotationMat4x4(theta*2, theta/2, theta);
 
             Mark resetMark = new Mark();
-
-
-
 
             List<ZPos> zpos = new ArrayList<>();
             // Loop through the triangles
             boolean showHidden = Config.displayMode== Config.DisplayMode.WIRE_SHOW_HIDDEN;
 
-            for (int t = 0; t < F32Triangle3D.count; t++) {
-                int rotatedTri = F32Triangle3D.mulMat4(t, rotXYZMat4);
-                int translatedTri = F32Triangle3D.addVec3(rotatedTri, moveAwayVec3);
+            for (tri t: tri.all()){
+                // here we rotate and then move into the Z plane.
+                tri translatedTri = t.mul(xyzRot4x4).add(moveAwayVec3);
                 float howVisible = 1f;
                 boolean isVisible = showHidden;
-                /// None below here
-
 
                 if (!showHidden) {
                     // here we decide whether the camera can see the plane that the translated triangle is on.
                     // so we need the normal to the triangle in the coordinate system
-                    int translatedTriNormalVec3 = F32Triangle3D.normalSumOfSquares(translatedTri); ////relative to coord system
+                    vec3 translatedTriNormalVec3 = translatedTri.normalSumOfSquares();
 
                     // Now we work out where the camera is relative to a line projected from the plane to the camera
                     // We need a point on the triangle it looks like assume we can use any,
                     // intuition suggests the one with the minimal Z is best no?
 
-                    int translatedTriV0Vec3 = F32Triangle3D.getV0(translatedTri);
-                    int translatedTriV0MinusCamera = F32Vec3.subVec3(translatedTriV0Vec3, cameraVec3);
-                    howVisible = F32Vec3.sumOf(F32Vec3.mulVec3(translatedTriV0MinusCamera, translatedTriNormalVec3));
+                    vec3 translatedTriV0Vec3 = translatedTri.v0();
+                    vec3 translatedTriV0MinusCamera = translatedTriV0Vec3.sub(cameraVec3);
+
+                    howVisible = translatedTriV0MinusCamera.mul(translatedTriNormalVec3).sumOf();
 
                     // howVisible is a 'scalar'
                     // it's magnitude indicating how much it is 'facing away from' the camera.
@@ -286,14 +282,20 @@ public class Main {
                 }
 
                 if (isVisible) {
-                    int projected = F32Triangle3D.mulMat4(translatedTri, projectionMat4);
-                    int centered = F32Triangle3D.mulScaler(projected, view.image.getHeight() / 4);
-                    centered = F32Triangle3D.addScaler(centered, view.image.getHeight() / 2);
-                    zpos.add(new ZPos(centered, F32Triangle3D.getRGB(centered), howVisible));
+                    // now project the 3d triangle to 2d plane.
+                    tri projected = translatedTri.mul(projectionMat4);
+
+                    // Projected triangle is still in unit 1 space!!
+                    // Scale up to quarter height  then add half height of screen
+                    tri centered = projected.mul(view.image.getHeight() / 4).add(view.image.getHeight() / 2);
+
+                    zpos.add(new ZPos(centered, howVisible));
                 }
 
-                resetMark.reset3D();
+                resetMark.reset3D(); // do not move this up.
             }
+
+
 
             Collections.sort(zpos);
 
