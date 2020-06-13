@@ -37,7 +37,7 @@ public class Main {
         enum DisplayMode {FILL, WIRE, WIRE_SHOW_HIDDEN, WIRE_AND_FILL}
 
         public static final ColourMode colourMode = ColourMode.COLOUR.COLOUR;
-        public static final DisplayMode displayMode = DisplayMode.WIRE_SHOW_HIDDEN;
+        public static final DisplayMode displayMode = DisplayMode.WIRE;
         public static final float deltaSquare = 10000f;
         public static final String eliteAsset = "BARREL";// null;//"COBRA";//"CONSTRICTOR";//COBRAMK1";
         public static final float thetaDelta = 0.001f;

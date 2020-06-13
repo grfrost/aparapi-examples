@@ -8,6 +8,24 @@ public class F32Triangle3D {
     static final int V2 = 2;
     static final int RGB = 3;
 
+     /*
+       v0----v1         v0----v2
+        \    |           \    |
+         \   |            \   |
+          \  |    --->     \  |
+           \ |              \ |
+            \|               \|
+             v2               v1
+   */
+
+    public static int rewind(int i) {
+        i *= SIZE;
+        int temp =         pool.entries[i + V1];
+        pool.entries[i + V1] =  pool.entries[i + V2];
+        pool.entries[i + V2] = temp;
+        return i;
+    }
+
     public static class Pool {
         public final int max;
         public int count = 0;
