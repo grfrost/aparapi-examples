@@ -1,5 +1,7 @@
 package com.aparapi.examples.view;
 
+import com.aparapi.examples.view.f32.F32Mesh3D;
+import com.aparapi.examples.view.f32.F32Vec3;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;

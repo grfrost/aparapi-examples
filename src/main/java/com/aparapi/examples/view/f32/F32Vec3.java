@@ -1,4 +1,4 @@
-package com.aparapi.examples.view;
+package com.aparapi.examples.view.f32;
 
 public class F32Vec3 {
     static final int SIZE = 3;
@@ -6,10 +6,10 @@ public class F32Vec3 {
     static final int X = 0;
     static final int Y = 1;
     static final int Z = 2;
-    static int count = 0;
-    static float entries[] = new float[MAX * SIZE];
+    public static int count = 0;
+    public static float entries[] = new float[MAX * SIZE];
 
-    static int createVec3(float x, float y, float z) {
+    public static int createVec3(float x, float y, float z) {
         entries[count * SIZE + X] = x;
         entries[count * SIZE + Y] = y;
         entries[count * SIZE + Z] = z;
@@ -57,12 +57,12 @@ public class F32Vec3 {
         return createVec3(entries[lhs + X] + entries[rhs + X], entries[lhs + Y] + entries[rhs + Y], entries[lhs + Z] + entries[rhs + Z]);
     }
 
-    static int subVec3(int lhs, int rhs) {
+    public static int subVec3(int lhs, int rhs) {
         lhs *= SIZE;
         rhs *= SIZE;
         return createVec3(entries[lhs + X] - entries[rhs + X], entries[lhs + Y] - entries[rhs + Y], entries[lhs + Z] - entries[rhs + Z]);
     }
-    static int mulVec3(int lhs, int rhs) {
+    public static int mulVec3(int lhs, int rhs) {
         lhs *= SIZE;
         rhs *= SIZE;
         return createVec3(entries[lhs + X] * entries[rhs + X], entries[lhs + Y] * entries[rhs + Y], entries[lhs + Z] * entries[rhs + Z]);
@@ -78,7 +78,7 @@ public class F32Vec3 {
         i *= SIZE;
         return entries[i + X] * entries[i + X] + entries[i + Y] * entries[i + Y] + entries[i + Z] * entries[i + Z];
     }
-    static float sumOf(int i) {
+    public static float sumOf(int i) {
         i *= SIZE;
         return entries[i + X]  + entries[i + Y] + entries[i + Z] ;
     }

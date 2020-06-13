@@ -4,6 +4,12 @@ package com.aparapi.examples.view;
 
 import com.aparapi.Kernel;
 import com.aparapi.Range;
+import com.aparapi.examples.view.f32.F32Mat4;
+import com.aparapi.examples.view.f32.F32Mesh3D;
+import com.aparapi.examples.view.f32.F32Triangle3D;
+import com.aparapi.examples.view.f32.F32Vec3;
+import com.aparapi.examples.view.i32.I32Triangle2D;
+import com.aparapi.examples.view.i32.I32Vec2;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

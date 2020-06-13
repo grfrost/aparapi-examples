@@ -1,6 +1,6 @@
-package com.aparapi.examples.view;
+package com.aparapi.examples.view.f32;
 
-class F32Triangle3D {
+public class F32Triangle3D {
     static final int SIZE = 4;
     static final int MAX = 1600;
     static final int V0 = 0;
@@ -8,8 +8,8 @@ class F32Triangle3D {
     static final int V2 = 2;
     static final int RGB = 3;
 
-    static int count = 0;
-    static int entries[] = new int[MAX * SIZE];
+    public static int count = 0;
+    public static int entries[] = new int[MAX * SIZE];
 
     static int fillTriangle3D(int i, int v0, int v1, int v2, int rgb) {
         i *= SIZE;
@@ -20,7 +20,7 @@ class F32Triangle3D {
         return i;
     }
 
-    static int createTriangle3D(int v0, int v1, int v2, int rgb) {
+    public static int createTriangle3D(int v0, int v1, int v2, int rgb) {
         fillTriangle3D(count, v0, v1, v2, rgb);
         return count++;
     }
@@ -30,22 +30,22 @@ class F32Triangle3D {
         return F32Vec3.asString(entries[i + V0]) + " -> " + F32Vec3.asString(entries[i + V1]) + " -> " + F32Vec3.asString(entries[i + V2]) + " =" + String.format("0x%8x", entries[i + RGB]);
     }
 
-    static int mulMat4(int i, int m4) {
+    public static int mulMat4(int i, int m4) {
         i *= SIZE;
         return createTriangle3D(F32Vec3.mulMat4(entries[i + V0], m4), F32Vec3.mulMat4(entries[i + V1], m4), F32Vec3.mulMat4(entries[i + V2], m4), entries[i + RGB]);
     }
 
-    static int addVec3(int i, int v3) {
+    public static int addVec3(int i, int v3) {
         i *= SIZE;
         return createTriangle3D(F32Vec3.addVec3(entries[i + V0], v3), F32Vec3.addVec3(entries[i + V1], v3), F32Vec3.addVec3(entries[i + V2], v3), entries[i + RGB]);
     }
 
-    static int mulScaler(int i, float s) {
+    public static int mulScaler(int i, float s) {
         i *= SIZE;
         return createTriangle3D(F32Vec3.mulScaler(entries[i + V0], s), F32Vec3.mulScaler(entries[i + V1], s), F32Vec3.mulScaler(entries[i + V2], s), entries[i + RGB]);
     }
 
-    static int addScaler(int i, float s) {
+    public static int addScaler(int i, float s) {
         i *= SIZE;
         return createTriangle3D(F32Vec3.addScaler(entries[i + V0], s), F32Vec3.addScaler(entries[i + V1], s), F32Vec3.addScaler(entries[i + V2], s), entries[i + RGB]);
     }

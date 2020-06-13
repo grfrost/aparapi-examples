@@ -1,27 +1,27 @@
-package com.aparapi.examples.view;
+package com.aparapi.examples.view.f32;
 
-class F32Mesh3D {
+public class F32Mesh3D {
     String name;
 
     int triSum;
     int triCenter;
 
-    F32Mesh3D(String name){
+    public F32Mesh3D(String name){
         this.name = name;
     }
     final int SIZE = 1;
     final int MAX = 400;
     public final static int ABINORMAL = -1;
 
-    int triCount = 0;
-    int triEntries[] = new int[MAX * SIZE];
-    int normalEntries[] = new int[MAX *SIZE];
-    int vecCount = 0;
-    int vecEntries[] = new int[MAX * SIZE];
+    public int triCount = 0;
+    public int triEntries[] = new int[MAX * SIZE];
+    public int normalEntries[] = new int[MAX *SIZE];
+    public int vecCount = 0;
+    public int vecEntries[] = new int[MAX * SIZE];
   //  int vecSum = F32Vec3.createVec3(0,0,0);
  //   int vecCenter;
 
-    F32Mesh3D tri(int v0, int v1, int v2, int rgb, int vN) {
+    public F32Mesh3D tri(int v0, int v1, int v2, int rgb, int vN) {
         int newTri = F32Triangle3D.createTriangle3D(v0, v1, v2, rgb);
         normalEntries[triCount] = vN;
         triEntries[triCount++]= newTri;
@@ -56,13 +56,13 @@ class F32Mesh3D {
 
     }
 
-    void fin(){
+    public void fin(){
      //   cube(F32Vec3.getX(triCenter),F32Vec3.getY(triCenter), F32Vec3.getZ(triCenter), .1f );
       //  vecCenter = F32Vec3.divScaler(vecSum, 3*(vecCount+3));
       //  cube(F32Vec3.getX(vecCenter),F32Vec3.getY(vecCenter), F32Vec3.getZ(vecCenter), .02f );
     }
 
-    F32Mesh3D quad(int v0, int v1, int v2, int v3, int rgb, int vN) {
+    public F32Mesh3D quad(int v0, int v1, int v2, int v3, int rgb, int vN) {
   /*
        v0-----v1
         |\    |
@@ -81,7 +81,7 @@ class F32Mesh3D {
         return quad(v0, v1, v2, v3, rgb, ABINORMAL);
     }
 
-    F32Mesh3D pent(int v0, int v1, int v2, int v3, int v4, int rgb, int vN) {
+    public F32Mesh3D pent(int v0, int v1, int v2, int v3, int v4, int rgb, int vN) {
   /*
        v0-----v1
        |\    | \
@@ -100,7 +100,7 @@ class F32Mesh3D {
     F32Mesh3D pent(int v0, int v1, int v2, int v3, int v4, int rgb){
         return pent(v0, v1, v2, v3, v4, rgb, ABINORMAL);
     }
-    F32Mesh3D hex(int v0, int v1, int v2, int v3, int v4, int v5, int rgb, int vN) {
+    public F32Mesh3D hex(int v0, int v1, int v2, int v3, int v4, int v5, int rgb, int vN) {
   /*
        v0-----v1
       / |\    | \
@@ -135,7 +135,7 @@ class F32Mesh3D {
      */
 
 
-    F32Mesh3D cube(
+    public F32Mesh3D cube(
             float x,
             float y,
             float z,
@@ -169,7 +169,7 @@ http://paulbourke.net/dataformats/obj/
      */
 
 
-    F32Mesh3D cubeoctahedron(
+    public F32Mesh3D cubeoctahedron(
             float x,
             float y,
             float z,

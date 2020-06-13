@@ -1,13 +1,13 @@
-package com.aparapi.examples.view;
+package com.aparapi.examples.view.i32;
 
 public class I32Vec2 {
-    static final int SIZE = 2;
-    static final int MAX = 800;
-    static final int X = 0;
-    static final int Y = 1;
+    public static final int SIZE = 2;
+    public  static final int MAX = 800;
+    public  static final int X = 0;
+    public static final int Y = 1;
 
-    static int count = 0;
-    static int entries[] = new int[MAX * SIZE];
+    public static int count = 0;
+    public static int entries[] = new int[MAX * SIZE];
 
     static int createVec2(int x, int y) {
         entries[count * SIZE + X] = x;

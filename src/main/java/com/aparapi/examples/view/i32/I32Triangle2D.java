@@ -1,10 +1,10 @@
-package com.aparapi.examples.view;
+package com.aparapi.examples.view.i32;
 
 public class I32Triangle2D {
-    static final int SIZE = 3;
-    static final int V0 = 0;
-    static final int V1 = 1;
-    static final int V2 = 2;
+    public static final int SIZE = 3;
+    public static final int V0 = 0;
+    public static final int V1 = 1;
+    public static final int V2 = 2;
     public static int MAX = 1000;
     public static int count = 0;
 
@@ -46,7 +46,7 @@ public class I32Triangle2D {
     }
 
 
-static int createTriangle(int x0, int y0, int x1, int y1, int x2, int y2, int col) {
+public static int createTriangle(int x0, int y0, int x1, int y1, int x2, int y2, int col) {
         entries[count * SIZE + V0] = I32Vec2.createVec2(x0,y0);
         // We need the triangle to be clock wound
         if (side(x0, y0, x1, y1, x2, y2) > 0) {

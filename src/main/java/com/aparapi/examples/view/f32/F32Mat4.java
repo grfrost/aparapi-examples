@@ -1,4 +1,4 @@
-package com.aparapi.examples.view;
+package com.aparapi.examples.view.f32;
 
 public class F32Mat4 {
     static final int SIZE = 16;
@@ -19,9 +19,9 @@ public class F32Mat4 {
     static final int X1Y3 = 13;
     static final int X2Y3 = 14;
     static final int X3Y3 = 15;
-    static int count = 0;
+    public static int count = 0;
 
-    static float entries[] = new float[MAX_MAT4 * SIZE];
+    public static float entries[] = new float[MAX_MAT4 * SIZE];
 
     static int createMat4(float x0y0, float x1y0, float x2y0, float x3y0,
                           float x0y1, float x1y1, float x2y1, float x3y1,
@@ -46,7 +46,7 @@ public class F32Mat4 {
         return count++;
     }
   //  https://stackoverflow.com/questions/28075743/how-do-i-compose-a-rotation-matrix-with-human-readable-angles-from-scratch/28084380#28084380
-    static int mulMat4(int lhs, int rhs) {
+    public static int mulMat4(int lhs, int rhs) {
         lhs *= SIZE;
         rhs *= SIZE;
         return createMat4(
@@ -85,7 +85,7 @@ public class F32Mat4 {
                 entries[i + X0Y3], entries[i + X1Y3], entries[i + X2Y3], entries[i + X3Y3]);
     }
 
-    static int createProjectionMatrix(float width, float height, float near, float far, float fieldOfViewDeg) {
+    public static int createProjectionMatrix(float width, float height, float near, float far, float fieldOfViewDeg) {
 
         // Projection Matrix
 
@@ -115,7 +115,7 @@ public class F32Mat4 {
 
     }
 
-    static int createRotXMat4(float thetaRadians) {
+    public static int createRotXMat4(float thetaRadians) {
         float sinTheta = (float) Math.sin(thetaRadians);
         float cosTheta = (float) Math.cos(thetaRadians);
         return createMat4(
@@ -127,7 +127,7 @@ public class F32Mat4 {
         );
     }
 
-    static int createRotZMat4(float thetaRadians) {
+    public static int createRotZMat4(float thetaRadians) {
         float sinTheta = (float) Math.sin(thetaRadians);
         float cosTheta = (float) Math.cos(thetaRadians);
         return createMat4(
@@ -138,7 +138,7 @@ public class F32Mat4 {
         );
     }
 
-    static int createRotYMat4(float thetaRadians) {
+    public static int createRotYMat4(float thetaRadians) {
         float sinTheta = (float) Math.sin(thetaRadians);
         float cosTheta = (float) Math.cos(thetaRadians);
         return createMat4(
