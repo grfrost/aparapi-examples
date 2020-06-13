@@ -18,8 +18,6 @@ public class F32Mesh3D {
     public int normalEntries[] = new int[MAX *SIZE];
     public int vecCount = 0;
     public int vecEntries[] = new int[MAX * SIZE];
-  //  int vecSum = F32Vec3.createVec3(0,0,0);
- //   int vecCenter;
 
     public F32Mesh3D tri(int v0, int v1, int v2, int rgb, int vN) {
         int newTri = F32Triangle3D.createTriangle3D(v0, v1, v2, rgb);

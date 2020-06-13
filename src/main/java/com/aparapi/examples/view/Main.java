@@ -8,14 +8,17 @@ import com.aparapi.examples.view.f32.F32Mat4;
 import com.aparapi.examples.view.f32.F32Mesh3D;
 import com.aparapi.examples.view.f32.F32Triangle3D;
 import com.aparapi.examples.view.f32.F32Vec3;
-import com.aparapi.examples.view.f32.mat4x4;
-import com.aparapi.examples.view.f32.projectionMat4x4;
-import com.aparapi.examples.view.f32.rotationMat4x4;
+import com.aparapi.examples.view.f32.mat4;
+import com.aparapi.examples.view.f32.projectionMat4;
+import com.aparapi.examples.view.f32.rotationMat4;
 import com.aparapi.examples.view.f32.tri;
 import com.aparapi.examples.view.f32.vec3;
 import com.aparapi.examples.view.i32.I32Triangle2D;
 import com.aparapi.examples.view.i32.I32Vec2;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -25,19 +28,21 @@ import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
 
 public class Main {
-    public static class Config{
-        enum ColourMode {NORMALIZED_COLOUR, NORMALIZED_INV_COLOUR, COLOUR, NORMALIZED_WHITE, NORMALIZED_INV_WHITE, WHITE};
-        enum DisplayMode {FILL, WIRE, WIRE_SHOW_HIDDEN, WIRE_AND_FILL};
+    public static class Config {
+        enum ColourMode {NORMALIZED_COLOUR, NORMALIZED_INV_COLOUR, COLOUR, NORMALIZED_WHITE, NORMALIZED_INV_WHITE, WHITE}
+        enum DisplayMode {FILL, WIRE, WIRE_SHOW_HIDDEN, WIRE_AND_FILL}
 
         public static final ColourMode colourMode = ColourMode.COLOUR.COLOUR;
-        public static final DisplayMode displayMode = DisplayMode.WIRE;
+        public static final DisplayMode displayMode = DisplayMode.WIRE_SHOW_HIDDEN;
         public static final float deltaSquare = 10000f;
         public static final String eliteAsset = "BARREL";// null;//"COBRA";//"CONSTRICTOR";//COBRAMK1";
         public static final float thetaDelta = 0.001f;
     }
+
     public static class View {
         private BufferedImage image;
         int[] offscreenRgb;
@@ -66,7 +71,7 @@ public class Main {
         long frames;
         vec3 cameraVec3;
         vec3 lookDirVec3;
-        mat4x4 projectionMat4;
+        mat4 projectionMat4;
         vec3 centerVec3;
         vec3 moveAwayVec3;
 
@@ -78,9 +83,9 @@ public class Main {
             int markedMat4;
 
             Mark() {
-                markedTriangles3D = F32Triangle3D.count;
-                markedVec3 = F32Vec3.count;
-                markedMat4 = F32Mat4.count;
+                markedTriangles3D = F32Triangle3D.pool.count;
+                markedVec3 = F32Vec3.pool.count;
+                markedMat4 = F32Mat4.pool.count;
                 markedTriangles2D = I32Triangle2D.count;
                 markedVec2 = I32Vec2.count;
             }
@@ -92,9 +97,9 @@ public class Main {
             }
 
             void reset3D() {
-                F32Triangle3D.count = markedTriangles3D;
-                F32Vec3.count = markedVec3;
-                F32Mat4.count = markedMat4;
+                F32Triangle3D.pool.count = markedTriangles3D;
+                F32Vec3.pool.count = markedVec3;
+                F32Mat4.pool.count = markedMat4;
             }
 
         }
@@ -135,19 +140,19 @@ public class Main {
 
 
             // (new F32Mesh3D("rubric")).rubric(.49f);
-             (new F32Mesh3D("cubeoctahedron")).cubeoctahedron(0, 0, 0, 4).fin();
+            (new F32Mesh3D("cubeoctahedron")).cubeoctahedron(0, 0, 0, 4).fin();
             if (Config.eliteAsset != null) {
                 Elite.load(Config.eliteAsset);
-            }else {
+            } else {
                 (new F32Mesh3D("cube")).cube(0, 0, 0, 2f);
             }
             //   Triangle3D.load(new File("/home/gfrost/github/grfrost/aparapi-build/foo.obj"));
 
-            cameraVec3 = new vec3(0f,0f,0f);
-            lookDirVec3 = new vec3(0f,0f,0f);//F32Vec3.createVec3(0, 0, 0);
-            projectionMat4 = new projectionMat4x4(view.image.getWidth(), view.image.getHeight(), 0.1f, 5f, 90f);
+            cameraVec3 = new vec3(0f, 0f, 0f);
+            lookDirVec3 = new vec3(0f, 0f, 0f);//F32Vec3.createVec3(0, 0, 0);
+            projectionMat4 = new projectionMat4(view.image.getWidth(), view.image.getHeight(), 0.1f, 5f, 90f);
 
-             centerVec3 = new vec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
+            centerVec3 = new vec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
             moveAwayVec3 = new vec3(0f, 0f, 12f);
             mark = new Mark();
 
@@ -210,7 +215,6 @@ public class Main {
             }
 
 
-
             int create() {
                 int r = ((rgb & 0xff0000) >> 16);
                 int g = ((rgb & 0x00ff00) >> 8);
@@ -220,10 +224,10 @@ public class Main {
                     r = r - (int) (20 * howVisible);
                     g = g - (int) (20 * howVisible);
                     b = b - (int) (20 * howVisible);
-                }else   if (Config.colourMode == Config.ColourMode.NORMALIZED_INV_COLOUR) {
-                        r = r + (int) (20 * howVisible);
-                        g = g + (int) (20 * howVisible);
-                        b = b + (int) (20 * howVisible);
+                } else if (Config.colourMode == Config.ColourMode.NORMALIZED_INV_COLOUR) {
+                    r = r + (int) (20 * howVisible);
+                    g = g + (int) (20 * howVisible);
+                    b = b + (int) (20 * howVisible);
                 } else if (Config.colourMode == Config.ColourMode.NORMALIZED_WHITE) {
                     r = g = b = (int) (0x7f - (20 * howVisible));
                 } else if (Config.colourMode == Config.ColourMode.NORMALIZED_INV_WHITE) {
@@ -242,20 +246,20 @@ public class Main {
             float theta = elapsedMillis * Config.thetaDelta;
 
             if ((frames++ % 50) == 0) {
-                System.out.println("Frames " + frames + " Theta = " + theta + " FPS = " + ((frames * 1000) / elapsedMillis)+ " Vertices "+kernel.vec2EntriesCount);
+                System.out.println("Frames " + frames + " Theta = " + theta + " FPS = " + ((frames * 1000) / elapsedMillis) + " Vertices " + kernel.vec2EntriesCount);
             }
 
             mark.resetAll();
 
-            mat4x4 xyzRot4x4  = new rotationMat4x4(theta*2, theta/2, theta);
+            mat4 xyzRot4x4 = new rotationMat4(theta * 2, theta / 2, theta);
 
             Mark resetMark = new Mark();
 
             List<ZPos> zpos = new ArrayList<>();
             // Loop through the triangles
-            boolean showHidden = Config.displayMode== Config.DisplayMode.WIRE_SHOW_HIDDEN;
+            boolean showHidden = Config.displayMode == Config.DisplayMode.WIRE_SHOW_HIDDEN;
 
-            for (tri t: tri.all()){
+            for (tri t : tri.all()) {
                 // here we rotate and then move into the Z plane.
                 tri translatedTri = t.mul(xyzRot4x4).add(moveAwayVec3);
                 float howVisible = 1f;
@@ -294,7 +298,6 @@ public class Main {
 
                 resetMark.reset3D(); // do not move this up.
             }
-
 
 
             Collections.sort(zpos);
@@ -341,8 +344,9 @@ public class Main {
             height = _height;
             rgb = _rgb;
         }
-        public static boolean wire = Config.displayMode == Config.DisplayMode.WIRE || Config.displayMode== Config.DisplayMode.WIRE_AND_FILL ||Config.displayMode== Config.DisplayMode.WIRE_SHOW_HIDDEN;
-        public static  boolean fill = Config.displayMode== Config.DisplayMode.WIRE_AND_FILL || Config.displayMode == Config.DisplayMode.FILL;
+
+        public static boolean wire = Config.displayMode == Config.DisplayMode.WIRE || Config.displayMode == Config.DisplayMode.WIRE_AND_FILL || Config.displayMode == Config.DisplayMode.WIRE_SHOW_HIDDEN;
+        public static boolean fill = Config.displayMode == Config.DisplayMode.WIRE_AND_FILL || Config.displayMode == Config.DisplayMode.FILL;
         public static float deltaSquare = Config.deltaSquare;
 
         public void run() {
@@ -363,7 +367,7 @@ public class Main {
                 if (fill && I32Triangle2D.intriangle(x, y, x0, y0, x1, y1, x2, y2)) {
                     col = colors[t];
                 } else if (wire && I32Triangle2D.onedge(x, y, x0, y0, x1, y1, x2, y2, deltaSquare)) {
-                    col =0xffffff;//colors[t];
+                    col = 0xffffff;//colors[t];
                 }
             }
 

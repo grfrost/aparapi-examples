@@ -8,46 +8,55 @@ public class F32Triangle3D {
     static final int V2 = 2;
     static final int RGB = 3;
 
-    public static int count = 0;
-    public static int entries[] = new int[MAX * SIZE];
+    public static class Pool {
+        public final int max;
+        public int count = 0;
+        public final int entries[];
+        Pool(int max) {
+            this.max = max;
+            this.entries = new int[max * SIZE];
+        }
+    }
+    public static Pool pool = new Pool(1600);
+
 
     static int fillTriangle3D(int i, int v0, int v1, int v2, int rgb) {
         i *= SIZE;
-        entries[i + V0] = v0;
-        entries[i + V1] = v1;
-        entries[i + V2] = v2;
-        entries[i + RGB] = rgb;
+        pool.entries[i + V0] = v0;
+        pool.entries[i + V1] = v1;
+        pool.entries[i + V2] = v2;
+        pool.entries[i + RGB] = rgb;
         return i;
     }
 
     public static int createTriangle3D(int v0, int v1, int v2, int rgb) {
-        fillTriangle3D(count, v0, v1, v2, rgb);
-        return count++;
+        fillTriangle3D(pool.count, v0, v1, v2, rgb);
+        return pool.count++;
     }
 
     static String asString(int i) {
         i *= SIZE;
-        return F32Vec3.asString(entries[i + V0]) + " -> " + F32Vec3.asString(entries[i + V1]) + " -> " + F32Vec3.asString(entries[i + V2]) + " =" + String.format("0x%8x", entries[i + RGB]);
+        return F32Vec3.asString(pool.entries[i + V0]) + " -> " + F32Vec3.asString(pool.entries[i + V1]) + " -> " + F32Vec3.asString(pool.entries[i + V2]) + " =" + String.format("0x%8x", pool.entries[i + RGB]);
     }
 
     public static int mulMat4(int i, int m4) {
         i *= SIZE;
-        return createTriangle3D(F32Vec3.mulMat4(entries[i + V0], m4), F32Vec3.mulMat4(entries[i + V1], m4), F32Vec3.mulMat4(entries[i + V2], m4), entries[i + RGB]);
+        return createTriangle3D(F32Vec3.mulMat4(pool.entries[i + V0], m4), F32Vec3.mulMat4(pool.entries[i + V1], m4), F32Vec3.mulMat4(pool.entries[i + V2], m4), pool.entries[i + RGB]);
     }
 
     public static int addVec3(int i, int v3) {
         i *= SIZE;
-        return createTriangle3D(F32Vec3.addVec3(entries[i + V0], v3), F32Vec3.addVec3(entries[i + V1], v3), F32Vec3.addVec3(entries[i + V2], v3), entries[i + RGB]);
+        return createTriangle3D(F32Vec3.addVec3(pool.entries[i + V0], v3), F32Vec3.addVec3(pool.entries[i + V1], v3), F32Vec3.addVec3(pool.entries[i + V2], v3), pool.entries[i + RGB]);
     }
 
     public static int mulScaler(int i, float s) {
         i *= SIZE;
-        return createTriangle3D(F32Vec3.mulScaler(entries[i + V0], s), F32Vec3.mulScaler(entries[i + V1], s), F32Vec3.mulScaler(entries[i + V2], s), entries[i + RGB]);
+        return createTriangle3D(F32Vec3.mulScaler(pool.entries[i + V0], s), F32Vec3.mulScaler(pool.entries[i + V1], s), F32Vec3.mulScaler(pool.entries[i + V2], s), pool.entries[i + RGB]);
     }
 
     public static int addScaler(int i, float s) {
         i *= SIZE;
-        return createTriangle3D(F32Vec3.addScaler(entries[i + V0], s), F32Vec3.addScaler(entries[i + V1], s), F32Vec3.addScaler(entries[i + V2], s), entries[i + RGB]);
+        return createTriangle3D(F32Vec3.addScaler(pool.entries[i + V0], s), F32Vec3.addScaler(pool.entries[i + V1], s), F32Vec3.addScaler(pool.entries[i + V2], s), pool.entries[i + RGB]);
     }
 
     public static int getCentre(int i){
@@ -63,22 +72,22 @@ public class F32Triangle3D {
 
     public static int getV0(int i) {
         i *= SIZE;
-        return F32Triangle3D.entries[i + F32Triangle3D.V0];
+        return F32Triangle3D.pool.entries[i + F32Triangle3D.V0];
     }
 
     public static int getV1(int i) {
         i *= SIZE;
-        return F32Triangle3D.entries[i + F32Triangle3D.V1];
+        return F32Triangle3D.pool.entries[i + F32Triangle3D.V1];
     }
 
     public static int getV2(int i) {
         i *= SIZE;
-        return F32Triangle3D.entries[i + F32Triangle3D.V2];
+        return F32Triangle3D.pool.entries[i + F32Triangle3D.V2];
     }
 
     public static int getRGB(int i) {
         i *= SIZE;
-        return F32Triangle3D.entries[i + F32Triangle3D.RGB];
+        return F32Triangle3D.pool.entries[i + F32Triangle3D.RGB];
     }
 
 
