@@ -41,7 +41,7 @@ public class Main {
         public static final ColourMode colourMode = ColourMode.COLOUR.COLOUR;
         public static final DisplayMode displayMode = DisplayMode.WIRE;
         public static final float deltaSquare = 10000f;
-        public static final String eliteAsset = "BARREL";// null;//"COBRA";//"CONSTRICTOR";//COBRAMK1";
+        public static final String eliteAsset = null;//"BARREL";// null;//"COBRA";//"CONSTRICTOR";//COBRAMK1";
         public static final float thetaDelta = 0.001f;
     }
 
@@ -283,8 +283,8 @@ public class Main {
 
                     vec3 cameraDeltaVec3 =  t.center().sub(cameraVec3); // clearly our default camera is 0,0,0
 
-                    howVisible = cameraDeltaVec3.mul( t.normalSumOfSquares()).sumOf();
-
+                  //  howVisible = cameraDeltaVec3.mul( t.normalSumOfSquares()).sumOf();
+                    howVisible = cameraDeltaVec3.dotProd( t.normal());
                     // howVisible is a 'scalar'
                     // it's magnitude indicating how much it is 'facing away from' the camera.
                     // it's sign indicates if the camera can indeed see the location.

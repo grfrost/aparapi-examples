@@ -95,6 +95,22 @@ public class F32Vec3 {
         return (float) Math.sqrt(sumOfSquares(i));
     }
 
+    /*
+        lhs= | 1|   rhs= | 2|
+             | 3|        | 7|
+             | 4|        |-5|
+
+        lhs xprod rhs = | x  y  z| =  | 3  4|x - | 1  4|y  | 1  3|
+                        | 1  3  4|    | 7 -5|    | 2 -5|   | 2  7|
+                        | 2  7 -5|
+
+                      = (-15-28)x - (-5 -8)y + (7 - 6)z
+
+                      = -43x - (-13)y +1z
+                      = -43x + 14y +z
+
+     */
+
     static int crossProd(int lhs, int rhs) {
         lhs *= SIZE;
         rhs *= SIZE;
@@ -104,7 +120,24 @@ public class F32Vec3 {
                 pool.entries[lhs + X] * pool.entries[rhs + Y] - pool.entries[lhs + Y] * pool.entries[rhs + X]);
 
     }
-    static float dotProdAsScaler(int lhs, int rhs) {
+
+    /*
+        lhs= | 1|   rhs= | 2|
+             | 3|        | 7|
+             | 4|        |-5|
+
+        lhs0*rhs0 + lhs1*rhs1 + lhs2*rhs2
+         1  * 2   +  3  * 7   +  4  *-5
+
+            3     +    21     +   -20
+
+                       4
+
+     */
+
+
+
+    static float dotProd(int lhs, int rhs) {
         lhs *= SIZE;
         rhs *= SIZE;
 

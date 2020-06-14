@@ -19,6 +19,10 @@ public class vec3{
     public vec3 mul(vec3 v) {
         return new vec3(F32Vec3.mulVec3(id, v.id));
     }
+
+    public float dotProd(vec3 v){
+        return F32Vec3.dotProd(id, v.id);
+    }
     public float sumOf(){
         return F32Vec3.sumOf(id);
     }

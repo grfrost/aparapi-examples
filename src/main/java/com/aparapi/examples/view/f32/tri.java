@@ -32,6 +32,10 @@ public class tri {
         return new vec3(F32Triangle3D.normalSumOfSquares(id));
     }
 
+    public vec3 normal() {
+        return new vec3(F32Triangle3D.normal(id));
+    }
+
     public vec3 v0() {
         return new vec3(F32Triangle3D.getV0(id));
     }

@@ -51,7 +51,7 @@ public class F32Mesh3D {
                 int vN = normalEntries[t];
                 if (vN != ABINORMAL) {
                     int normFromTriVec3 = F32Triangle3D.normal(newTri);
-                    float normDotProd = F32Vec3.dotProdAsScaler(normFromTriVec3, vN);
+                    float normDotProd = F32Vec3.dotProd(normFromTriVec3, vN);
                     System.out.print("norms " + F32Vec3.asString(vN) + " vs " + F32Vec3.asString(normFromTriVec3));
                     System.out.println("   normDotProd " + normDotProd);
                     if (normDotProd <= 0) {
@@ -65,7 +65,7 @@ public class F32Mesh3D {
                 // create a normal .  This may be out instead of in
                 int triCenterNormVec3 = F32Triangle3D.normal(triCentreVec3);
                 // now compare with a normal to the center of the mesh (which should always be in)
-                float normDotProd = F32Vec3.dotProdAsScaler(triCenterNormVec3, triCenterVec3);
+                float normDotProd = F32Vec3.dotProd(triCenterNormVec3, triCenterVec3);
                 if (normDotProd >=0f) { // the normal from the center from the triangle was pointing out, so re wind it
                     F32Triangle3D.rewind(newTri);
                 }

@@ -109,10 +109,6 @@ public class F32Triangle3D {
     }
 
 
-   // public static int createI32Triangle2D(int i, int rgb, float normal) {
-
-  //  }
-
     public static int normal(int i) {
 
         int v0 = F32Triangle3D.getV0(i);
