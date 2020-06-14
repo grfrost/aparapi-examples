@@ -11,6 +11,8 @@ import com.aparapi.examples.view.f32.F32Vec3;
 import com.aparapi.examples.view.f32.mat4;
 import com.aparapi.examples.view.f32.projectionMat4;
 import com.aparapi.examples.view.f32.rotationMat4;
+import com.aparapi.examples.view.f32.scaleMat4;
+import com.aparapi.examples.view.f32.translateMat4;
 import com.aparapi.examples.view.f32.tri;
 import com.aparapi.examples.view.f32.vec3;
 import com.aparapi.examples.view.i32.I32Triangle2D;
@@ -151,6 +153,8 @@ public class Main {
             cameraVec3 = new vec3(0f, 0f, 0f);
             lookDirVec3 = new vec3(0f, 0f, 0f);//F32Vec3.createVec3(0, 0, 0);
             projectionMat4 = new projectionMat4(view.image.getWidth(), view.image.getHeight(), 0.1f, 5f, 90f);
+            projectionMat4 = projectionMat4.mul(new scaleMat4(view.image.getHeight()/4));
+            projectionMat4 = projectionMat4.mul(new translateMat4(view.image.getHeight()/2));
 
             centerVec3 = new vec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
             moveAwayVec3 = new vec3(0f, 0f, 12f);
@@ -261,23 +265,25 @@ public class Main {
 
             for (tri t : tri.all()) {
                 // here we rotate and then move into the Z plane.
-                tri translatedTri = t.mul(xyzRot4x4).add(moveAwayVec3);
+                t = t.mul(xyzRot4x4).add(moveAwayVec3);
                 float howVisible = 1f;
                 boolean isVisible = showHidden;
 
                 if (!showHidden) {
                     // here we decide whether the camera can see the plane that the translated triangle is on.
                     // so we need the normal to the triangle in the coordinate system
-                    vec3 translatedTriNormalVec3 = translatedTri.normalSumOfSquares();
 
                     // Now we work out where the camera is relative to a line projected from the plane to the camera
-                    // We need a point on the triangle it looks like assume we can use any,
+                    // if camera is at 0,0,0 clearly this is a no-op
+
+                    // We need a point on the triangle it looks like assume we can use any, I choose the center of the triangle
                     // intuition suggests the one with the minimal Z is best no?
 
-                    vec3 translatedTriV0Vec3 = translatedTri.v0();
-                    vec3 translatedTriV0MinusCamera = translatedTriV0Vec3.sub(cameraVec3);
+                    // We subtract the camera from our point on the triangle so we can compare
 
-                    howVisible = translatedTriV0MinusCamera.mul(translatedTriNormalVec3).sumOf();
+                    vec3 cameraDeltaVec3 =  t.center().sub(cameraVec3); // clearly our default camera is 0,0,0
+
+                    howVisible = cameraDeltaVec3.mul( t.normalSumOfSquares()).sumOf();
 
                     // howVisible is a 'scalar'
                     // it's magnitude indicating how much it is 'facing away from' the camera.
@@ -286,14 +292,13 @@ public class Main {
                 }
 
                 if (isVisible) {
-                    // now project the 3d triangle to 2d plane.
-                    tri projected = translatedTri.mul(projectionMat4);
-
                     // Projected triangle is still in unit 1 space!!
-                    // Scale up to quarter height  then add half height of screen
-                    tri centered = projected.mul(view.image.getHeight() / 4).add(view.image.getHeight() / 2);
+                    // now project the 3d triangle to 2d plane.
+                    // Scale up to quarter screen height then add half height of screen
 
-                    zpos.add(new ZPos(centered, howVisible));
+                    t = t.mul(projectionMat4);//  projection matrix also scales to screen and translate half a screen
+
+                    zpos.add(new ZPos(t, howVisible));
                 }
 
                 resetMark.reset3D(); // do not move this up.

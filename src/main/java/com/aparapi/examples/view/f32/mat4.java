@@ -17,4 +17,7 @@ public class mat4 {
                 x0y3, x1y3, x2y3, x3y3));
     }
 
+    public mat4 mul(mat4 m) {
+        return new mat4(F32Mat4.mulMat4(id, m.id));
+    }
 }

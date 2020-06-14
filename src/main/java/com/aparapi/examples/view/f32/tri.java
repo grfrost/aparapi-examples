@@ -55,4 +55,8 @@ public class tri {
     public int rgb() {
         return F32Triangle3D.getRGB(id);
     }
+
+    public vec3 center() {
+        return new vec3(F32Triangle3D.getCentre(id));
+    }
 }

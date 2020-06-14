@@ -8,13 +8,16 @@ public class F32Mesh3D {
     public F32Mesh3D(String name){
         this.name = name;
     }
-    final int SIZE = 1;
+    final int SIZE = 1; // triangle, triCenter, normal
+
     final int MAX = 400;
     public final static int ABINORMAL = -1;
 
     public int triCount = 0;
     public int triEntries[] = new int[MAX * SIZE];
+    public int triCenterVec3s[] = new int[MAX *SIZE];
     public int normalEntries[] = new int[MAX *SIZE];
+
     public int vecCount = 0;
     public int vecEntries[] = new int[MAX * SIZE];
 
@@ -23,21 +26,12 @@ public class F32Mesh3D {
         int newTri = F32Triangle3D.createTriangle3D(v0, v1, v2, rgb);
         normalEntries[triCount] = vN;
         triEntries[triCount]= newTri;
-
-        boolean old = true;
-        if (old) {
-            int newTriCentreVec3 = F32Triangle3D.getCentre(newTri);
-            if (triCount == 0) {
-                triSum = newTriCentreVec3;
-            } else {
-                triSum = F32Vec3.addVec3(triSum, newTriCentreVec3);
-            }
-        }else{ // Why does this not work?
-            if (triCount == 0) {
-                triSum = F32Vec3.addVec3(F32Vec3.addVec3(v0, v1), v2);
-            } else {
-                triSum = F32Vec3.addVec3(F32Vec3.addVec3(F32Vec3.addVec3(triSum,v0), v1), v2);
-            }
+        int triCentreVec3 = F32Triangle3D.getCentre(newTri);
+        triCenterVec3s[triCount]=triCentreVec3;
+        if (triCount == 0) {
+            triSum = triCentreVec3;
+        } else {
+            triSum = F32Vec3.addVec3(triSum, triCentreVec3);
         }
         triCount++;
         return this;
@@ -49,9 +43,8 @@ public class F32Mesh3D {
     }
 
     public void fin(){
-        int triCenter = F32Vec3.divScaler(triSum, triCount);
+        int triCenterVec3 = F32Vec3.divScaler(triSum, triCount);
         for (int t = 0; t < triCount; t++ ) {
-
             int newTri = triEntries[t];
             boolean old = false;
             if (old) {
@@ -59,28 +52,27 @@ public class F32Mesh3D {
                 if (vN != ABINORMAL) {
                     int normFromTriVec3 = F32Triangle3D.normal(newTri);
                     float normDotProd = F32Vec3.dotProdAsScaler(normFromTriVec3, vN);
-                    //  float normaDotProdNormalized = F32Vec3.sumOfSquares(normDotProd);
                     System.out.print("norms " + F32Vec3.asString(vN) + " vs " + F32Vec3.asString(normFromTriVec3));
                     System.out.println("   normDotProd " + normDotProd);
-                    if (normDotProd < 0) {
+                    if (normDotProd <= 0) {
                         F32Triangle3D.rewind(newTri);
                     }
-                    // System.out.println("   normDotProdNormalized "+normaDotProdNormalized);
+
                 }
             }else{
-                int newTriCentreVec3 = F32Triangle3D.getCentre(newTri);
-                int normFromTriVec3 = F32Triangle3D.normal(newTriCentreVec3);
-                float normDotProd = F32Vec3.dotProdAsScaler(normFromTriVec3, triCenter);
-                if (normDotProd >= 0) {
-                    newTri = F32Triangle3D.rewind(newTri);
-                    newTriCentreVec3 = F32Triangle3D.getCentre(newTri);
-                    normFromTriVec3 = F32Triangle3D.normal(newTriCentreVec3);
-                    float newNormDotProd = F32Vec3.dotProdAsScaler(normFromTriVec3, triCenter);
+                // from the center of this triangle
+                int triCentreVec3 = triCenterVec3s[t];//F32Triangle3D.getCentre(newTri);
+                // create a normal .  This may be out instead of in
+                int triCenterNormVec3 = F32Triangle3D.normal(triCentreVec3);
+                // now compare with a normal to the center of the mesh (which should always be in)
+                float normDotProd = F32Vec3.dotProdAsScaler(triCenterNormVec3, triCenterVec3);
+                if (normDotProd >=0f) { // the normal from the center from the triangle was pointing out, so re wind it
+                    F32Triangle3D.rewind(newTri);
                 }
             }
         }
 
-        cube(F32Vec3.getX(triCenter),F32Vec3.getY(triCenter), F32Vec3.getZ(triCenter), .1f );
+        cube(F32Vec3.getX(triCenterVec3),F32Vec3.getY(triCenterVec3), F32Vec3.getZ(triCenterVec3), .1f );
     }
 
     public F32Mesh3D quad(int v0, int v1, int v2, int v3, int rgb, int vN) {
