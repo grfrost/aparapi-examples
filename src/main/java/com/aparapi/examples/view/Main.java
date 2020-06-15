@@ -41,7 +41,7 @@ public class Main {
         public static final ColourMode colourMode = ColourMode.COLOUR.COLOUR;
         public static final DisplayMode displayMode = DisplayMode.WIRE;
         public static final float deltaSquare = 10000f;
-        public static final String eliteAsset = null;//"BARREL";// null;//"COBRA";//"CONSTRICTOR";//COBRAMK1";
+        public static final String eliteAsset = "BARREL";// null;//"COBRA";//"CONSTRICTOR";//COBRAMK1";
         public static final float thetaDelta = 0.001f;
     }
 
@@ -152,12 +152,12 @@ public class Main {
 
             cameraVec3 = new vec3(0f, 0f, 0f);
             lookDirVec3 = new vec3(0f, 0f, 0f);//F32Vec3.createVec3(0, 0, 0);
-            projectionMat4 = new projectionMat4(view.image.getWidth(), view.image.getHeight(), 0.1f, 5f, 90f);
+            projectionMat4 = new projectionMat4(view.image.getWidth(), view.image.getHeight(), 0.1f, 1000f, 60f);
             projectionMat4 = projectionMat4.mul(new scaleMat4(view.image.getHeight()/4));
             projectionMat4 = projectionMat4.mul(new translateMat4(view.image.getHeight()/2));
 
             centerVec3 = new vec3(view.image.getWidth() / 2, view.image.getHeight() / 2, 0);
-            moveAwayVec3 = new vec3(0f, 0f, 12f);
+            moveAwayVec3 = new vec3(0f, 0f, 20f);
             mark = new Mark();
 
         }
@@ -270,7 +270,7 @@ public class Main {
                 boolean isVisible = showHidden;
 
                 if (!showHidden) {
-                    // here we decide whether the camera can see the plane that the translated triangle is on.
+                    // here we determine whether the camera can see the plane that the translated triangle is on.
                     // so we need the normal to the triangle in the coordinate system
 
                     // Now we work out where the camera is relative to a line projected from the plane to the camera

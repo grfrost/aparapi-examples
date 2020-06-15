@@ -115,25 +115,25 @@ class Elite {
                                     || (lm = face3Pattern.matcher(line)).matches()
                             ) {
                                // showGroups("FACE ", lm);
-                                int vN = F32Vec3.createVec3( hex2Float(lm.group(3)),hex2Float(lm.group(4)),hex2Float(lm.group(5)));
+                            //    int vN = F32Vec3.createVec3( hex2Float(lm.group(3)),hex2Float(lm.group(4)),hex2Float(lm.group(5)));
                                 int v0 = mesh.vecEntries[Integer.parseInt(lm.group(6))];
                                 int v1 = mesh.vecEntries[Integer.parseInt(lm.group(7))];
                                 int v2 = mesh.vecEntries[Integer.parseInt(lm.group(8))];
 
                                 if (lm.groupCount()==8){
-                                    mesh.tri(v0, v1, v2,  0x00ff00, vN );
+                                    mesh.tri(v0, v1, v2,  0x00ff00 );
                                 }else {
                                     int v3 = mesh.vecEntries[Integer.parseInt(lm.group(9))];
                                     if (lm.groupCount() == 9) {
-                                        mesh.quad(v0, v1,v2, v3,  0xff0000, vN);
+                                        mesh.quad(v0, v1,v2, v3,  0xff0000);
                                     } else {
                                         int v4 = mesh.vecEntries[Integer.parseInt(lm.group(10))];
                                         if (lm.groupCount() == 10) {
-                                            mesh.pent(v0, v1, v2, v3, v4, 0x0000ff, vN);
+                                            mesh.pent(v0, v1, v2, v3, v4, 0x0000ff);
                                         } else {
                                             int v5 =  mesh.vecEntries[Integer.parseInt(lm.group(11))];
                                           //  System.out.println("normals {"+nx+","+ny+","+nz+"} abinormal="+abinormal);
-                                            mesh.hex(v0, v1, v2, v3, v4, v5, 0xfff000, vN);
+                                            mesh.hex(v0, v1, v2, v3, v4, v5, 0xfff000);
                                         }
                                     }
                                 }

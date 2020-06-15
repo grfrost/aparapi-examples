@@ -17,17 +17,19 @@ public class F32Mesh3D {
     public int triEntries[] = new int[MAX * SIZE];
     public int triCenterVec3s[] = new int[MAX *SIZE];
     public int normalEntries[] = new int[MAX *SIZE];
-
+    public int v0Vec3s[] = new int[MAX *SIZE];
     public int vecCount = 0;
     public int vecEntries[] = new int[MAX * SIZE];
 
 
-    public F32Mesh3D tri(int v0, int v1, int v2, int rgb, int vN) {
-        int newTri = F32Triangle3D.createTriangle3D(v0, v1, v2, rgb);
-        normalEntries[triCount] = vN;
-        triEntries[triCount]= newTri;
-        int triCentreVec3 = F32Triangle3D.getCentre(newTri);
+    public F32Mesh3D tri(int v0, int v1, int v2, int rgb) {
+        int tri = F32Triangle3D.createTriangle3D(v0, v1, v2, rgb);
+
+        triEntries[triCount]= tri;
+        normalEntries[triCount] = F32Triangle3D.normal(tri);
+        int triCentreVec3 = F32Triangle3D.getCentre(tri);
         triCenterVec3s[triCount]=triCentreVec3;
+        v0Vec3s[triCount]=F32Triangle3D.getV0(tri);
         if (triCount == 0) {
             triSum = triCentreVec3;
         } else {
@@ -37,45 +39,24 @@ public class F32Mesh3D {
         return this;
     }
 
-    F32Mesh3D tri(int v0, int v1, int v2, int rgb) {
-        return tri(v0, v1, v2, rgb, ABINORMAL);
-
-    }
 
     public void fin(){
-        int triCenterVec3 = F32Vec3.divScaler(triSum, triCount);
+        int meshCenterVec3 = F32Vec3.divScaler(triSum, triCount);
         for (int t = 0; t < triCount; t++ ) {
-            int newTri = triEntries[t];
-            boolean old = false;
-            if (old) {
-                int vN = normalEntries[t];
-                if (vN != ABINORMAL) {
-                    int normFromTriVec3 = F32Triangle3D.normal(newTri);
-                    float normDotProd = F32Vec3.dotProd(normFromTriVec3, vN);
-                    System.out.print("norms " + F32Vec3.asString(vN) + " vs " + F32Vec3.asString(normFromTriVec3));
-                    System.out.println("   normDotProd " + normDotProd);
-                    if (normDotProd <= 0) {
-                        F32Triangle3D.rewind(newTri);
-                    }
-
-                }
-            }else{
-                // from the center of this triangle
-                int triCentreVec3 = triCenterVec3s[t];//F32Triangle3D.getCentre(newTri);
-                // create a normal .  This may be out instead of in
-                int triCenterNormVec3 = F32Triangle3D.normal(triCentreVec3);
-                // now compare with a normal to the center of the mesh (which should always be in)
-                float normDotProd = F32Vec3.dotProd(triCenterNormVec3, triCenterVec3);
-                if (normDotProd >=0f) { // the normal from the center from the triangle was pointing out, so re wind it
-                    F32Triangle3D.rewind(newTri);
-                }
+            int tri = triEntries[t];
+            int v0Norm = normalEntries[t]; // from v0
+            int v0 = v0Vec3s[t];
+            int v0CenterDiff = F32Vec3.subVec3(meshCenterVec3, v0);
+            float normDotProd = F32Vec3.dotProd(v0CenterDiff, v0Norm);
+            if (normDotProd >0f) { // the normal from the center from the triangle was pointing out, so re wind it
+                F32Triangle3D.rewind(tri);
             }
         }
 
-        cube(F32Vec3.getX(triCenterVec3),F32Vec3.getY(triCenterVec3), F32Vec3.getZ(triCenterVec3), .1f );
+        cube(F32Vec3.getX(meshCenterVec3),F32Vec3.getY(meshCenterVec3), F32Vec3.getZ(meshCenterVec3), .1f );
     }
 
-    public F32Mesh3D quad(int v0, int v1, int v2, int v3, int rgb, int vN) {
+    public F32Mesh3D quad(int v0, int v1, int v2, int v3, int rgb) {
   /*
        v0-----v1
         |\    |
@@ -86,15 +67,12 @@ public class F32Mesh3D {
        v3-----v2
    */
 
-        tri(v0, v1, v2, rgb, vN);
-        tri(v0, v2, v3, rgb, vN);
+        tri(v0, v1, v2, rgb);
+        tri(v0, v2, v3, rgb);
         return this;
     }
-    F32Mesh3D quad(int v0, int v1, int v2, int v3, int rgb) {
-        return quad(v0, v1, v2, v3, rgb, ABINORMAL);
-    }
 
-    public F32Mesh3D pent(int v0, int v1, int v2, int v3, int v4, int rgb, int vN) {
+    public F32Mesh3D pent(int v0, int v1, int v2, int v3, int v4, int rgb) {
   /*
        v0-----v1
        |\    | \
@@ -105,15 +83,12 @@ public class F32Mesh3D {
        v4-----v3
    */
 
-        tri(v0, v1, v3, rgb, vN);
-        tri(v1, v2, v3, rgb, vN);
-        tri(v0, v3, v4, rgb, vN);
+        tri(v0, v1, v3, rgb);
+        tri(v1, v2, v3, rgb);
+        tri(v0, v3, v4, rgb);
         return this;
     }
-    F32Mesh3D pent(int v0, int v1, int v2, int v3, int v4, int rgb){
-        return pent(v0, v1, v2, v3, v4, rgb, ABINORMAL);
-    }
-    public F32Mesh3D hex(int v0, int v1, int v2, int v3, int v4, int v5, int rgb, int vN) {
+    public F32Mesh3D hex(int v0, int v1, int v2, int v3, int v4, int v5, int rgb) {
   /*
        v0-----v1
       / |\    | \
@@ -124,15 +99,13 @@ public class F32Mesh3D {
        v4-----v3
    */
 
-        tri(v0, v1, v3, rgb, vN);
-        tri(v1, v2, v3, rgb, vN);
-        tri(v0, v3, v4, rgb, vN);
-        tri(v0, v4, v5, rgb, vN);
+        tri(v0, v1, v3, rgb);
+        tri(v1, v2, v3, rgb);
+        tri(v0, v3, v4, rgb);
+        tri(v0, v4, v5, rgb);
         return this;
     }
-    F32Mesh3D hex(int v0, int v1, int v2, int v3, int v4, int v5, int rgb) {
-        return hex(v0, v1, v2, v3, v4 ,v5, rgb, ABINORMAL);
-    }
+
 
     /*
                a-----------d
